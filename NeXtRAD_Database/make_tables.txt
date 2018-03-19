@@ -1,0 +1,82 @@
+
+CREATE TABLE Trial (
+	pk_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	
+	ArchiveName VARCHAR(50) NOT NULL,
+	TrialDate DATE,
+	StartTime TIME,
+
+	PRIMARY KEY (pk_id),
+	UNIQUE KEY (ArchiveName)
+);
+
+
+CREATE TABLE Pulse ( 
+	fk_id INT UNSIGNED NOT NULL,
+
+	Waveform DECIMAL(8,4),
+ 	NumOfPRIs INT,
+	SamplesPerPRI INT,
+	DACDelay INT,
+	ADCDelay INT,
+	PolOrder VARCHAR(20),
+	PRI INT,
+	PrePulse INT,
+	LBandWaveformFreq INT,
+	XBandWaveformFreq INT,
+
+  	FOREIGN KEY (fk_id) REFERENCES Trial(pk_id)
+);
+
+
+CREATE TABLE Nodes (
+	fk_id INT UNSIGNED NOT NULL,
+
+	Node0LocationLat DECIMAL(8,4),
+	Node0LocationLon DECIMAL(8,4),
+	Node0LocationHt DECIMAL(8,4),
+	Node1LocationLat DECIMAL(8,4),
+	Node1LocationLon DECIMAL(8,4),
+	Node1LocationHt DECIMAL(8,4),
+	Node2LocationLat DECIMAL(8,4),
+	Node2LocationLon DECIMAL(8,4),
+	Node2LocationHt DECIMAL(8,4),
+	DTGOfBearing VARCHAR(20),
+	BaselineBisector INT,
+	Node0Range DECIMAL(8,4),
+	Node0Bearing DECIMAL(8,4),
+	Node1Range DECIMAL(8,4),
+	Node1Bearing DECIMAL(8,4),
+	Node2Range DECIMAL(8,4),
+	Node2Bearing DECIMAL(8,4),
+
+  	FOREIGN KEY (fk_id) REFERENCES Trial(pk_id)
+);
+
+
+CREATE TABLE Weather (
+	fk_id INT UNSIGNED NOT NULL,
+
+	DouglasSeaState DECIMAL(8,4),
+	WindSpeed DECIMAL(10,4),
+	WindDir DECIMAL(8,4),
+	WaveHeight DECIMAL(8,4),
+	WaveDir DECIMAL(8,4),
+	WavePeriod DECIMAL(8,4),
+	AirTemperature DECIMAL(8,4),
+	AirPressure DECIMAL(8,4),
+
+ 	FOREIGN KEY (fk_id) REFERENCES Trial(pk_id)
+);
+
+
+CREATE TABLE Target (
+	fk_id INT UNSIGNED NOT NULL,
+
+	TgtLocationLat DECIMAL(8,4),
+	TgtLocationLon DECIMAL(8,4),
+	TgtLocationHt DECIMAL(8,4),
+
+ 	FOREIGN KEY (fk_id) REFERENCES Trial(pk_id)
+);
+

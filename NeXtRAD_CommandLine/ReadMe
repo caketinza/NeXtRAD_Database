@@ -1,0 +1,34 @@
+16/09/2015 
+Dr Shirley Coetzee
+
+
+To run the netrad database 
+--------------------------
+
+1) Install MySQL on Linux. (I used Linux 14.04, Trusty Tahr)
+
+2) Enter the following commands in MySQL:
+mysql -uroot -pHello123;
+CREATE DATABASE netrad;
+SHOW DATABASES;
+USE netrad;
+
+3) To create the tables, copy the contents of make_tables.txt into MySQL. To delete the tables, copy the contents of drop_tables.txt into MySQL.
+
+4) Enter the following command in MySQL to check the tables:
+SHOW TABLES;
+
+5) To view the structure of a table (e.g. table config) type:
+DESCRIBE config;
+
+6) To load data from a netrad e*.m file (e.g. e14_05_08_1316_07_P1_1_200_S0_1_2047_node3.m) to the database in MySQL enter the following and enter your linux password (NOT your MySQL password 'Hello123'):
+sudo ./net
+
+
+
+
+
+
+
+
+
