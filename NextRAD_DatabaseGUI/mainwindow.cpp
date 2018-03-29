@@ -1356,3 +1356,8 @@ void MainWindow::on_comboBox_27_currentIndexChanged(const QString &arg1)
         ui->comboBox_28->addItems(weatherlist);
     }
 }
+
+void MainWindow::on_pushButton_3_clicked()
+{
+
+}
