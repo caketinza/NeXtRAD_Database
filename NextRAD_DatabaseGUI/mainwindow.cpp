@@ -1216,19 +1216,27 @@ bool MainWindow::add_weather_data()
 
 void MainWindow::on_pushButton_6_clicked()
 {
+
+    QCheckBox* check1 = new QCheckBox();
     QComboBox* box1 = new QComboBox();
     QStringList eepmeep;
     eepmeep << "Choose a table" << "Trial" << "Nodes" << "Target" << "Pulse" << "Weather";
     box1->addItems(eepmeep);
     QComboBox* box2 = new QComboBox();
     box2->addItem("Choose a field");
+    QComboBox* box3 = new QComboBox();
+    QStringList equators;
+    equators << "=" << "<>" << ">" << "<" << ">=" << "<=";
+    box3->addItems(equators);
     QLineEdit* line1 = new QLineEdit();
     QPushButton* button1 = new QPushButton("Delete");
 
 
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->addWidget(check1);
     layout->addWidget(box1);
     layout->addWidget(box2);
+    layout->addWidget(box3);
     layout->addWidget(line1);
     layout->addWidget(button1);
     ui->verticalLayout_2->addLayout(layout, 0);
@@ -1357,7 +1365,3 @@ void MainWindow::on_comboBox_27_currentIndexChanged(const QString &arg1)
     }
 }
 
-void MainWindow::on_pushButton_3_clicked()
-{
-
-}

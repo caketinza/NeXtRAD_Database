@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "iosfwd": "c",
+        "cstdlib": "c",
+        "typeinfo": "c",
+        "sstream": "c",
+        "iostream": "c",
+        "ostream": "c"
+    }
+}
