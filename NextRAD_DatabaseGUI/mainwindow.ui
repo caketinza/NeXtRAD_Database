@@ -26,6 +26,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="text">
+          <string>Backup Database</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <spacer name="horizontalSpacer">

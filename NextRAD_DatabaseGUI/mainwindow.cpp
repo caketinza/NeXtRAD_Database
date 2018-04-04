@@ -5,6 +5,7 @@
 #include <QtSql/QSqlError>
 #include <QFileDialog>
 #include <QSettings>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,6 +17,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     setWindowTitle("NeXtRAD Database");
+
+    QStringList args;
+    args<< "-uroot" << "-pbubsy3726" << "nextrad" << "<" << "/home/caitlin/Documents/MSc/NeXtRAD_Database/nextrad.sql";
+    QProcess process1;
+    process1.setStandardOutputFile("nextrad.sql");
+    process1.start("/usr/bin/mysql",args);
+    process1.waitForFinished();
 
     db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("localhost");
@@ -36,6 +44,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    QStringList args;
+    args<< "-uroot" << "-pbubsy3726" << "nextrad";
+    QProcess process;
+    process.setStandardOutputFile("nextrad.sql");
+    process.start("/usr/bin/mysqldump",args);
+    process.waitForFinished();
+    QFile::copy("/home/caitlin/build-NextRAD_DatabaseGUI-Desktop-Debug/nextrad.sql", "/home/caitlin/Documents/MSc/NeXtRAD_Database/nextrad.sql");
+
     db.close();
     delete ui;
 }
@@ -1365,3 +1381,14 @@ void MainWindow::on_comboBox_27_currentIndexChanged(const QString &arg1)
     }
 }
 
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    QStringList args;
+    args<< "-uroot" << "-pbubsy3726" << "nextrad";
+    QProcess process;
+    process.setStandardOutputFile("nextrad.sql");
+    process.start("/usr/bin/mysqldump",args);
+    process.waitForFinished();
+    QFile::copy("/home/caitlin/build-NextRAD_DatabaseGUI-Desktop-Debug/nextrad.sql", "/home/caitlin/Documents/MSc/NeXtRAD_Database/nextrad.sql");
+}

@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QTableWidgetItem>
 #include <QSettings>
+#include <QProcess>
 
 namespace Ui {
 class MainWindow;
@@ -62,6 +63,8 @@ private slots:
     void on_comboBox_23_currentIndexChanged(const QString &arg1);
 
     void on_comboBox_27_currentIndexChanged(const QString &arg1);
+
+    void on_pushButton_3_clicked();
 
 private:
     Ui::MainWindow *ui;
