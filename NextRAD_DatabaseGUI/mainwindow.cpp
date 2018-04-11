@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QProcess>
+#include <QDirIterator>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,12 +19,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowTitle("NeXtRAD Database");
 
-    QStringList args;
-    args<< "-uroot" << "-pbubsy3726" << "nextrad" << "<" << "/home/caitlin/Documents/MSc/NeXtRAD_Database/nextrad.sql";
-    QProcess process1;
-    process1.setStandardOutputFile("nextrad.sql");
-    process1.start("/usr/bin/mysql",args);
-    process1.waitForFinished();
+//    QStringList args;
+//    args<< "-uroot" << "-pbubsy3726" << "nextrad" << "<" << "/home/caitlin/Documents/MSc/NeXtRAD_Database/nextrad.sql";
+//    QProcess process1;
+//    process1.setStandardOutputFile("nextrad.sql");
+//    process1.start("/usr/bin/mysql",args);
+//    process1.waitForFinished();
 
     db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("localhost");
@@ -101,11 +102,11 @@ void MainWindow::on_pushButton_clicked()
         if (db.open())
         {
             ui->tableWidget->clear();
-            ui->tableWidget->setColumnCount(4);
+            ui->tableWidget->setColumnCount(6);
             ui->tableWidget->setRowCount(0);
 
             QStringList trialitems;
-            trialitems << "ID" << "Archive Name" << "Trial Date" << "Start Time";
+            trialitems << "ID" << "Archive Name" << "Trial Date" << "Start Time" << "Trial Location" << "Comments";
 
             ui->tableWidget->setHorizontalHeaderLabels(trialitems);
 
@@ -135,12 +136,14 @@ void MainWindow::on_pushButton_clicked()
             {
                 while (query.next())
                 {
-                    qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3);
+                    qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4) << query.value(5);
 
                     QString primaryid = query.value(0).toString();
                     QString archive = query.value(1).toString();
                     QString trialdate = query.value(2).toString();
                     QString starttime = query.value(3).toString();
+                    QString trialloc = query.value(4).toString();
+                    QString comments = query.value(5).toString();
 
                     ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
 
@@ -148,11 +151,15 @@ void MainWindow::on_pushButton_clicked()
                     QTableWidgetItem* archiveItem = new QTableWidgetItem(archive);
                     QTableWidgetItem* trialdateItem = new QTableWidgetItem(trialdate);
                     QTableWidgetItem* starttimeItem = new QTableWidgetItem(starttime);
+                    QTableWidgetItem* triallocItem = new QTableWidgetItem(trialloc);
+                    QTableWidgetItem* commentsItem = new QTableWidgetItem(comments);
 
                     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, primaryidItem);
                     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, archiveItem);
                     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 2, trialdateItem);
                     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 3, starttimeItem);
+                    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 4, triallocItem);
+                    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 5, commentsItem);
                 }
                 header->setSectionResizeMode(QHeaderView::Stretch);
             }
@@ -285,11 +292,11 @@ void MainWindow::on_pushButton_clicked()
         if (db.open())
         {
             ui->tableWidget->clear();
-            ui->tableWidget->setColumnCount(4);
+            ui->tableWidget->setColumnCount(7);
             ui->tableWidget->setRowCount(0);
 
             QStringList targetitems;
-            targetitems << "ID" << "Target Location Lat" << "Target Location Lon" << "Target Location Ht";
+            targetitems << "ID" << "Target Location Lat" << "Target Location Lon" << "Target Location Ht" << "Target Type" << "Target Area" << "Target Speed";
 
             ui->tableWidget->setHorizontalHeaderLabels(targetitems);
 
@@ -319,12 +326,15 @@ void MainWindow::on_pushButton_clicked()
             {
                 while (query.next())
                 {
-                    qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3);
+                    qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4) << query.value(5) << query.value(6);
 
                     QString foreignid = query.value(0).toString();
                     QString tgtloclat = query.value(1).toString();
                     QString tgtloclon = query.value(2).toString();
                     QString tgtlocht = query.value(3).toString();
+                    QString tgttype = query.value(4).toString();
+                    QString tgtarea = query.value(5).toString();
+                    QString tgtspeed = query.value(6).toString();
 
                     ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
 
@@ -332,11 +342,17 @@ void MainWindow::on_pushButton_clicked()
                     QTableWidgetItem* tgtloclatItem = new QTableWidgetItem(tgtloclat);
                     QTableWidgetItem* tgtloclonItem = new QTableWidgetItem(tgtloclon);
                     QTableWidgetItem* tgtlochtItem = new QTableWidgetItem(tgtlocht);
+                    QTableWidgetItem* tgttypeItem = new QTableWidgetItem(tgttype);
+                    QTableWidgetItem* tgtareaItem = new QTableWidgetItem(tgtarea);
+                    QTableWidgetItem* tgtspeedItem = new QTableWidgetItem(tgtspeed);
 
                     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, foreignidItem);
                     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, tgtloclatItem);
                     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 2, tgtloclonItem);
                     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 3, tgtlochtItem);
+                    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 4, tgttypeItem);
+                    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 5, tgtareaItem);
+                    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 6, tgtspeedItem);
                 }
                 header->setSectionResizeMode(QHeaderView::Stretch);
             }
@@ -871,11 +887,11 @@ bool MainWindow::load_trial_data()
     if (db.open())
     {
         ui->tableWidget->clear();
-        ui->tableWidget->setColumnCount(4);
+        ui->tableWidget->setColumnCount(6);
         ui->tableWidget->setRowCount(0);
 
         QStringList trialitems;
-        trialitems << "ID" << "Archive Name" << "Trial Date" << "Start Time";
+        trialitems << "ID" << "Archive Name" << "Trial Date" << "Start Time" << "Trial Location" << "Comments";
 
         ui->tableWidget->setHorizontalHeaderLabels(trialitems);
 
@@ -884,12 +900,14 @@ bool MainWindow::load_trial_data()
         {
             while (query.next())
             {
-                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3);
+                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4) << query.value(5);
 
                 QString primaryid = query.value(0).toString();
                 QString archive = query.value(1).toString();
                 QString trialdate = query.value(2).toString();
                 QString starttime = query.value(3).toString();
+                QString trialloc = query.value(4).toString();
+                QString comments = query.value(5).toString();
 
                 ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
 
@@ -897,11 +915,15 @@ bool MainWindow::load_trial_data()
                 QTableWidgetItem* archiveItem = new QTableWidgetItem(archive);
                 QTableWidgetItem* trialdateItem = new QTableWidgetItem(trialdate);
                 QTableWidgetItem* starttimeItem = new QTableWidgetItem(starttime);
+                QTableWidgetItem* triallocItem = new QTableWidgetItem(trialloc);
+                QTableWidgetItem* commentsItem = new QTableWidgetItem(comments);
 
                 ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, primaryidItem);
                 ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, archiveItem);
                 ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 2, trialdateItem);
                 ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 3, starttimeItem);
+                ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 4, triallocItem);
+                ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 5, commentsItem);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
@@ -1017,11 +1039,11 @@ bool MainWindow::load_target_data()
     if (db.open())
     {
         ui->tableWidget->clear();
-        ui->tableWidget->setColumnCount(4);
+        ui->tableWidget->setColumnCount(7);
         ui->tableWidget->setRowCount(0);
 
         QStringList targetitems;
-        targetitems << "ID" << "Target Location Lat" << "Target Location Lon" << "Target Location Ht";
+        targetitems << "ID" << "Target Location Lat" << "Target Location Lon" << "Target Location Ht" << "Target Type" << "Target Area" << "Target Speed";
 
         ui->tableWidget->setHorizontalHeaderLabels(targetitems);
 
@@ -1030,12 +1052,15 @@ bool MainWindow::load_target_data()
         {
             while (query.next())
             {
-                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3);
+                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4) << query.value(5) << query.value(6);
 
                 QString foreignid = query.value(0).toString();
                 QString tgtloclat = query.value(1).toString();
                 QString tgtloclon = query.value(2).toString();
                 QString tgtlocht = query.value(3).toString();
+                QString tgttype = query.value(4).toString();
+                QString tgtarea = query.value(5).toString();
+                QString tgtspeed = query.value(6).toString();
 
                 ui->tableWidget->setRowCount(ui->tableWidget->rowCount() + 1);
 
@@ -1043,11 +1068,17 @@ bool MainWindow::load_target_data()
                 QTableWidgetItem* tgtloclatItem = new QTableWidgetItem(tgtloclat);
                 QTableWidgetItem* tgtloclonItem = new QTableWidgetItem(tgtloclon);
                 QTableWidgetItem* tgtlochtItem = new QTableWidgetItem(tgtlocht);
+                QTableWidgetItem* tgttypeItem = new QTableWidgetItem(tgttype);
+                QTableWidgetItem* tgtareaItem = new QTableWidgetItem(tgtarea);
+                QTableWidgetItem* tgtspeedItem = new QTableWidgetItem(tgtspeed);
 
                 ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, foreignidItem);
                 ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, tgtloclatItem);
                 ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 2, tgtloclonItem);
                 ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 3, tgtlochtItem);
+                ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 4, tgttypeItem);
+                ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 5, tgtareaItem);
+                ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 6, tgtspeedItem);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
@@ -1279,7 +1310,7 @@ void MainWindow::on_comboBox_5_currentIndexChanged(const QString &arg1)
     else if (arg1 == "Target")
     {
         QStringList targetlist;
-        targetlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt";
+        targetlist << "TgtLocationLat" << "TgtLocationLon" << "TgLocationHt";
         ui->comboBox_3->clear();
         ui->comboBox_3->addItems(targetlist);
     }
@@ -1381,7 +1412,7 @@ void MainWindow::on_comboBox_27_currentIndexChanged(const QString &arg1)
     }
 }
 
-
+//method can probably be deleted
 void MainWindow::on_pushButton_3_clicked()
 {
     QStringList args;
@@ -1391,4 +1422,331 @@ void MainWindow::on_pushButton_3_clicked()
     process.start("/usr/bin/mysqldump",args);
     process.waitForFinished();
     QFile::copy("/home/caitlin/build-NextRAD_DatabaseGUI-Desktop-Debug/nextrad.sql", "/home/caitlin/Documents/MSc/NeXtRAD_Database/nextrad.sql");
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    //choose directory
+    QStringList help;
+    ui->label_2->clear();
+    QDirIterator it("/home/caitlin/Downloads/Data", QStringList() << "*.ini", QDir::NoFilter, QDirIterator::Subdirectories);
+    while (it.hasNext())
+    {
+        help << it.next();
+        ui->label_2->setText(ui->label_2->text()+ " : " + it.next());
+
+        QString filename = it.next();
+        //ui->label_2->setText(filename+" =   " + ui->label_2->text());
+
+//        QSettings settings(filename, QSettings::IniFormat);
+
+//        settings.beginGroup("Timing");
+//        QStringList timkeys = settings.allKeys();
+
+//        QStringList timKeys, timValues;
+
+//        foreach (const QString &childKey, timkeys)
+//        {
+//            timKeys << childKey;
+//            timValues << settings.value(childKey).toString();
+//        }
+
+//        QString year = timValues.at(timKeys.indexOf("YEAR", 0));
+//        QString month = timValues.at(timKeys.indexOf("MONTH", 0));
+//        QString day = timValues.at(timKeys.indexOf("DAY", 0));
+//        QString hour = timValues.at(timKeys.indexOf("HOUR", 0));
+//        QString min = timValues.at(timKeys.indexOf("MINUTE", 0));
+//        QString sec = timValues.at(timKeys.indexOf("SECOND", 0));
+
+//        QString archivename = year + "-" + month + "-" + day + "_" + hour + ":" + min + ":" + sec;
+//        QString trialdate = year + "-" + month + "-" + day;
+//        QString starttime = hour + ":" + min + ":" + sec;
+
+//        settings.endGroup();
+
+//        QSqlQuery query;
+//        if (query.exec("INSERT INTO Trial (ArchiveName, TrialDate, StartTime) VALUES ('" + archivename + "','" + trialdate + "','" + starttime + "')"))
+//        {
+//            QMessageBox::information(this, "Update Success", "Trial data added to database.");
+//        }
+//        else
+//        {
+//            qDebug() << query.lastError().text();
+//        }
+
+
+    }
+
+
+//    //choose a file
+//    QString fileName = QFileDialog::getOpenFileName(this, tr("Choose File"), "/home/caitlin", tr("Header Files(*.ini);;Text Files (*.txt)"));
+//    ui->lineEdit->setText(fileName);
+
+//    //load a file into the database
+//    QSettings settings(fileName, QSettings::IniFormat);
+
+
+//    //load timings into Trial table
+//    settings.beginGroup("Timing");
+//    QStringList timkeys = settings.allKeys();
+
+//    QStringList timKeys, timValues;
+
+//    foreach (const QString &childKey, timkeys)
+//    {
+//        timKeys << childKey;
+//        timValues << settings.value(childKey).toString();
+//    }
+
+//    QString year = timValues.at(timKeys.indexOf("YEAR", 0));
+//    QString month = timValues.at(timKeys.indexOf("MONTH", 0));
+//    QString day = timValues.at(timKeys.indexOf("DAY", 0));
+//    QString hour = timValues.at(timKeys.indexOf("HOUR", 0));
+//    QString min = timValues.at(timKeys.indexOf("MINUTE", 0));
+//    QString sec = timValues.at(timKeys.indexOf("SECOND", 0));
+
+//    QString archivename = year + "-" + month + "-" + day + "_" + hour + ":" + min + ":" + sec;
+//    QString trialdate = year + "-" + month + "-" + day;
+//    QString starttime = hour + ":" + min + ":" + sec;
+
+//    settings.endGroup();
+
+//    QSqlQuery query;
+//    if (query.exec("INSERT INTO Trial (ArchiveName, TrialDate, StartTime) VALUES ('" + archivename + "','" + trialdate + "','" + starttime + "')"))
+//    {
+//        QMessageBox::information(this, "Update Success", "Trial data added to database.");
+//    }
+//    else
+//    {
+//        qDebug() << query.lastError().text();
+//    }
+
+
+//    QString fk_id;
+//    if (query.exec("SELECT pk_id FROM Trial WHERE ArchiveName = '" + archivename + "';"))
+//    {
+//        while (query.next())
+//        {
+//            qDebug() << query.value(0);
+
+//            fk_id = query.value(0).toString();
+//        }
+//    }
+//    else
+//    {
+//        qDebug() << query.lastError().text();
+//    }
+
+//    //previously been loaded check
+//    if (query.exec("SELECT fk_id FROM Nodes where fk_id = '" + fk_id + "'"))
+//    {
+//        query.next();
+//        if (query.value(0).toString() == fk_id)
+//        {
+//            ui->label_2->setText("duplicate");
+//            QMessageBox::warning(this, "Duplicate Data", "Node data previously added to database.");
+//        }
+//        else
+//        {
+//            ui->label_2->setText("not duplicate");
+//            //load geometry and bearings into Nodes table
+//            settings.beginGroup("GeometrySettings");
+//            QStringList geomkeys = settings.allKeys();
+//            QStringList geomKeys, geomValues;
+
+//            foreach (const QString &childKey, geomkeys)
+//            {
+//                geomKeys << childKey;
+//                geomValues << settings.value(childKey).toString();
+//            }
+
+//            QString node0lat = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_LAT", 0));
+//            QString node0lon = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_LON", 0));
+//            QString node0ht = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_HT", 0));
+//            QString node1lat = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_LAT", 0));
+//            QString node1lon = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_LON", 0));
+//            QString node1ht = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_HT", 0));
+//            QString node2lat = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_LAT", 0));
+//            QString node2lon = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_LON", 0));
+//            QString node2ht = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_HT", 0));
+//            settings.endGroup();
+
+//            settings.beginGroup("Bearings");
+//            QStringList bearkeys = settings.allKeys();
+//            QStringList bearKeys, bearValues;
+
+//            foreach (const QString &childKey, bearkeys)
+//            {
+//                bearKeys << childKey;
+//                bearValues << settings.value(childKey).toString();
+//            }
+
+//            QString dtg = bearValues.at(bearKeys.indexOf("DTG", 0));
+//            QString basebi = bearValues.at(bearKeys.indexOf("BASELINE_BISECTOR", 0));
+//            QString node0rng = bearValues.at(bearKeys.indexOf("NODE0_RANGE", 0));
+//            QString node0bear = bearValues.at(bearKeys.indexOf("NODE0_BEARING", 0));
+//            QString node1rng = bearValues.at(bearKeys.indexOf("NODE1_RANGE", 0));
+//            QString node1bear = bearValues.at(bearKeys.indexOf("NODE1_BEARING", 0));
+//            QString node2rng = bearValues.at(bearKeys.indexOf("NODE2_RANGE", 0));
+//            QString node2bear = bearValues.at(bearKeys.indexOf("NODE2_BEARING", 0));
+
+//            settings.endGroup();
+
+//            if (query.exec("INSERT INTO Nodes (fk_id, Node0LocationLat, Node0LocationLon, Node0LocationHt, Node1LocationLat, Node1LocationLon, Node1LocationHt, "
+//                           "Node2LocationLat, Node2LocationLon, Node2LocationHt, DTGOfBearing, BaselineBisector, Node0Range, Node0Bearing, Node1Range, Node1Bearing, "
+//                           "Node2Range, Node2Bearing) VALUES ('" + fk_id + "','" + node0lat + "','" + node0lon + "','" + node0ht + "','" + node1lat + "','" +
+//                           node1lon + "','" + node1ht + "','" + node2lat + "','" + node2lon + "','" + node2ht + "','" + dtg + "','" + basebi + "','" +
+//                           node0rng + "','" + node0bear + "','" + node1rng + "','" + node1bear + "','" + node2rng + "','" + node2bear + "')"))
+//            {
+//                QMessageBox::information(this, "Update Success", "Node data added to database.");
+//            }
+//            else
+//            {
+//                qDebug() << query.lastError().text();
+//            }
+//        }
+//    }
+
+
+//    //previously been loaded check
+//    if (query.exec("SELECT fk_id FROM Target where fk_id = '" + fk_id + "'"))
+//    {
+//        query.next();
+//        if (query.value(0).toString() == fk_id)
+//        {
+//            ui->label_2->setText("duplicate");
+//            QMessageBox::warning(this, "Duplicate Data", "Target data previously added to database.");
+//        }
+//        else
+//        {
+//            ui->label_2->setText("not duplicate");
+
+//            //load target in Target table
+//            settings.beginGroup("TargetSettings");
+//            QStringList tgtkeys = settings.allKeys();
+//            QStringList tgtKeys, tgtValues;
+
+//            foreach (const QString &childKey, tgtkeys)
+//            {
+//                tgtKeys << childKey;
+//                tgtValues << settings.value(childKey).toString();
+//            }
+
+//            QString tgtlat = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_LAT", 0));
+//            QString tgtlon = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_LON", 0));
+//            QString tgtht = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_HT", 0));
+
+//            settings.endGroup();
+
+//            if (query.exec("INSERT INTO Target (fk_id, TgtLocationLat, TgtLocationLon, TgtLocationHt) VALUES ('" + fk_id + "','" + tgtlat + "','" + tgtlon + "','" + tgtht + "');"))
+//            {
+//                QMessageBox::information(this, "Update Success", "Target data added to database.");
+//            }
+//            else
+//            {
+//                qDebug() << query.lastError().text();
+//            }
+//        }
+//    }
+
+
+//    //previously been loaded check
+//    if (query.exec("SELECT fk_id FROM Pulse where fk_id = '" + fk_id + "'"))
+//    {
+//        query.next();
+//        if (query.value(0).toString() == fk_id)
+//        {
+//            ui->label_2->setText("duplicate");
+//            QMessageBox::warning(this, "Duplicate Data", "Pulse data previously added to database.");
+//        }
+//        else
+//        {
+//            ui->label_2->setText("not duplicate");
+
+//            //load pulses in Pulse table
+//            settings.beginGroup("PulseParameters");
+//            QStringList pulsekeys = settings.allKeys();
+//            QStringList pulseKeys, pulseValues;
+
+//            foreach (const QString &childKey, pulsekeys)
+//            {
+//                pulseKeys << childKey;
+//                pulseValues << settings.value(childKey).toString();
+//            }
+
+//            QString wave = pulseValues.at(pulseKeys.indexOf("WAVEFORM_INDEX", 0));
+//            QString numPRI = pulseValues.at(pulseKeys.indexOf("NUM_PRIS", 0));
+//            QString samples = pulseValues.at(pulseKeys.indexOf("SAMPLES_PER_PRI", 0));
+//            QString dacdelay = pulseValues.at(pulseKeys.indexOf("DAC_DELAY", 0));
+//            QString adcdelay = pulseValues.at(pulseKeys.indexOf("ADC_DELAY", 0));
+//            QString polorder = pulseValues.at(pulseKeys.indexOf("POL_ORDER", 0));
+//            QString PRI = pulseValues.at(pulseKeys.indexOf("PRI", 0));
+//            QString prepulse = pulseValues.at(pulseKeys.indexOf("PRE_PULSE", 0));
+//            QString lbandf = pulseValues.at(pulseKeys.indexOf("L_BAND_WAVEFORM_FREQ", 0));
+//            QString xbandf = pulseValues.at(pulseKeys.indexOf("X_BAND_WAVEFORM_FREQ", 0));
+
+//            settings.endGroup();
+
+//            if (query.exec("INSERT INTO Pulse (fk_id, Waveform, NumOfPRIs, SamplesPerPRI, DACDelay, ADCDelay, PolOrder, PRI, PrePulse, LBandWaveformFreq, XBandWaveformFreq) "
+//                           "VALUES ('" + fk_id + "','" + wave + "','" + numPRI + "','" + samples + "','" + dacdelay + "','" + adcdelay + "','" + polorder + "','" +
+//                           PRI + "','" + prepulse + "','" + lbandf + "','" + xbandf + "');"))
+//            {
+//                QMessageBox::information(this, "Update Success", "Pulse data added to database.");
+//            }
+//            else
+//            {
+//                qDebug() << query.lastError().text();
+//            }
+//        }
+//    }
+
+
+//    //previously been loaded check
+//    if (query.exec("SELECT fk_id FROM Weather where fk_id = '" + fk_id + "'"))
+//    {
+//        query.next();
+//        if (query.value(0).toString() == fk_id)
+//        {
+//            ui->label_2->setText("duplicate");
+//            QMessageBox::warning(this, "Duplicate Data", "Weather data previously added to database.");
+//        }
+//        else
+//        {
+//            ui->label_2->setText("not duplicate");
+//            //load weather in Weather table
+//            settings.beginGroup("Weather");
+//            QStringList weatherkeys = settings.allKeys();
+//            QStringList weatherKeys, weatherValues;
+
+//            foreach (const QString &childKey, weatherkeys)
+//            {
+//                weatherKeys << childKey;
+//                weatherValues << settings.value(childKey).toString();
+//            }
+
+//            QString seastate = weatherValues.at(weatherKeys.indexOf("DOUGLAS_SEA_STATE", 0));
+//            QString windspd = weatherValues.at(weatherKeys.indexOf("WIND_SPEED", 0));
+//            QString winddir = weatherValues.at(weatherKeys.indexOf("WIND_DIR", 0));
+//            QString waveht = weatherValues.at(weatherKeys.indexOf("WAVE_HEIGHT", 0));
+//            QString wavedir = weatherValues.at(weatherKeys.indexOf("WAVE_DIR", 0));
+//            QString waveper = weatherValues.at(weatherKeys.indexOf("WAVE_PERIOD", 0));
+//            QString airtemp = weatherValues.at(weatherKeys.indexOf("AIR_TEMPERATURE", 0));
+//            QString airpress = weatherValues.at(weatherKeys.indexOf("AIR_PRESSURE", 0));
+
+//            settings.endGroup();
+
+//            if (query.exec("INSERT INTO Weather (fk_id, DouglasSeaState, WindSpeed, WindDir, WaveHeight, WaveDir, WavePeriod, AirTemperature, AirPressure) VALUES ('" +
+//                           fk_id + "','" + seastate + "','" + windspd + "','" + winddir + "','" + waveht + "','" + wavedir + "','" + waveper + "','" + airtemp + "','" + airpress + "');"))
+//            {
+//                QMessageBox::information(this, "Update Success", "Weather data added to database.");
+//            }
+//            else
+//            {
+//                qDebug() << query.lastError().text();
+//            }
+//            ui->comboBox->setCurrentIndex(ui->comboBox->findText("Weather"));
+//        }
+//    }
+
+//    ui->lineEdit->clear();
 }
