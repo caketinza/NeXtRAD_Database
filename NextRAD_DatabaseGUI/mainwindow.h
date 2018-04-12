@@ -23,41 +23,18 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-private slots:
-    void on_tableWidget_itemChanged(QTableWidgetItem *item);
+private slots:    
+    bool load_trial_data(QString querytext);
 
-private slots:
-    void on_pushButton_clicked();
-    
-    void on_lineEdit_returnPressed();
-    
-    void on_comboBox_currentIndexChanged(int index);
+    bool load_node_data(QString querytext);
 
-    void on_tableWidget_doubleClicked(const QModelIndex &index);
+    bool load_pulse_data(QString querytext);
 
-    void on_pushButton_2_clicked();
+    bool load_target_data(QString querytext);
 
-    bool load_trial_data();
+    bool load_weather_data(QString querytext);
 
-    bool load_node_data();
 
-    bool load_pulse_data();
-
-    bool load_target_data();
-
-    bool load_weather_data();
-
-    bool add_trial_data();
-
-    bool add_node_data();
-
-    bool add_pulse_data();
-
-    bool add_target_data();
-
-    bool add_weather_data();
-
-    void on_pushButton_6_clicked();
 
     void on_comboBox_5_currentIndexChanged(const QString &arg1);
 
@@ -65,14 +42,23 @@ private slots:
 
     void on_comboBox_27_currentIndexChanged(const QString &arg1);
 
-    void on_pushButton_3_clicked();
+    void on_pushButton_search_clicked();
 
-    void on_pushButton_4_clicked();
+    void on_pushButton_loadFiles_clicked();
+
+    void on_pushButton_loadFile_clicked();
+
+    void on_pushButton_newSearchRow_clicked();
 
 private:
     Ui::MainWindow *ui;
     bool hasInit;
     int whichTable;
+    QString valueChoice0, valueChoice1, valueChoice2, valueChoice3, valueChoice4;
+    QString fieldChoice0, fieldChoice1, fieldChoice2, fieldChoice3, fieldChoice4;
+    QString tableChoice0, tableChoice1, tableChoice2, tableChoice3, tableChoice4;
+    QString equatorChoice0, equatorChoice1, equatorChoice2, equatorChoice3, equatorChoice4;
+    QString andor0, andor1;
     QSqlDatabase db;
 };
 

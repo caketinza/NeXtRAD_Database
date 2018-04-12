@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1101</width>
-    <height>661</height>
+    <width>1278</width>
+    <height>771</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,112 +16,358 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QGroupBox" name="groupBox">
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_3">
-         <property name="text">
-          <string>Backup Database</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="currentIndex">
+       <number>4</number>
+      </property>
+      <widget class="QWidget" name="tab_trial">
+       <attribute name="title">
+        <string>Trial</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_trial">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustIgnored</enum>
+          </property>
+          <property name="gridStyle">
+           <enum>Qt::SolidLine</enum>
+          </property>
+          <column>
+           <property name="text">
+            <string>ID</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
+          </column>
+          <column>
+           <property name="text">
+            <string>Archive Name</string>
            </property>
-          </spacer>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Choose Table:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBox">
-             <item>
-              <property name="text">
-               <string>Trial</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Nodes</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Target</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Pulse</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Weather</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QTableWidget" name="tableWidget">
-         <column>
-          <property name="text">
-           <string>ID</string>
+          </column>
+          <column>
+           <property name="text">
+            <string>Trial Date</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Start Time</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Trial Location</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Comments</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Interference</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_nodes">
+       <attribute name="title">
+        <string>Nodes</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_nodes">
+          <column>
+           <property name="text">
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 0 Location Lat</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 1 Location Lon</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 0 Location Ht</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 1 Location Lat</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 1 Location Lon</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 1 Location Ht</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 2 Location Lat</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 2 Location Lon</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 2 Location Ht</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>DTG of Bearing</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Baseline Bisector</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 0 Range</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 0 Bearing</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 1 Range</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 1 Bearing</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 2 Range</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Node 2 Bearing</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Bistatic Angle 0_1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Bistatic Angle 0_2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Bistatic Angle 2_0</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_target">
+       <attribute name="title">
+        <string>Target</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_target">
+          <column>
+           <property name="text">
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Target Location Lat</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Target Location Lon</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Target Location Ht</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Target Type</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Target Area</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Target Speed</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_pulse">
+       <attribute name="title">
+        <string>Pulse</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_pulse">
+          <column>
+           <property name="text">
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Waveform</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Num. of PRIs</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Samples per PRI</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>DAC Delay</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>ADC Delay</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Pol. Order</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>PRI</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>PrePulse</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>L-Band Waveform Freq.</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>X-Band Waveform Freq.</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_weather">
+       <attribute name="title">
+        <string>Weather</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <widget class="QTableWidget" name="tableWidget_weather">
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustIgnored</enum>
           </property>
-          <property name="font">
-           <font>
-            <strikeout>false</strikeout>
-           </font>
-          </property>
-          <property name="textAlignment">
-           <set>AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Archive Name</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Trial Date</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Start Time</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-      </layout>
+          <column>
+           <property name="text">
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Douglas Sea State</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Wind Speed</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Wind Direction</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Wave Height</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Wave Direction</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Wave Period</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Air Temperature</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Air Pressure</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
     <item>
@@ -138,14 +384,14 @@
         <widget class="QLineEdit" name="lineEdit"/>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="pushButton_loadFile">
          <property name="text">
           <string>Load File</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_4">
+        <widget class="QPushButton" name="pushButton_loadFiles">
          <property name="text">
           <string>Load Multiple Files</string>
          </property>
@@ -183,7 +429,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_6">
+          <widget class="QPushButton" name="pushButton_newSearchRow">
            <property name="text">
             <string>Add New Search Row</string>
            </property>
@@ -577,7 +823,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="pushButton_search">
          <property name="text">
           <string>Search</string>
          </property>
@@ -593,7 +839,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1101</width>
+     <width>1278</width>
      <height>25</height>
     </rect>
    </property>
