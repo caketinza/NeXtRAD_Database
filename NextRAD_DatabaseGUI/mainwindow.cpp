@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     hasInit = false;
-    numTerms = 0;
 
     ui->setupUi(this);
 
@@ -48,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     ui->tabWidget->setCurrentIndex(0);
+    hasInit = true;
 }
 
 MainWindow::~MainWindow()
@@ -369,10 +369,9 @@ bool MainWindow::load_weather_data(QString querytext)
     return true;
 }
 
-
-
 void MainWindow::on_pushButton_loadFile_clicked()
 {
+    hasInit = false;
     //choose a file
     QString filename = QFileDialog::getOpenFileName(this, tr("Choose File"), "/home/caitlin", tr("Header Files(*.ini)"));
     ui->lineEdit->setText(filename);
@@ -383,11 +382,19 @@ void MainWindow::on_pushButton_loadFile_clicked()
     add_pulse_data(filename, fk_id);
     add_weather_data(filename, fk_id);
 
+    load_trial_data("SELECT * FROM Trial");
+    load_node_data("SELECT * FROM Nodes");
+    load_target_data("SELECT * FROM Target");
+    load_pulse_data("SELECT * FROM Pulse");
+    load_weather_data("SELECT * FROM Weather");
+
     ui->lineEdit->clear();
+    hasInit = true;
 }
 
 void MainWindow::on_pushButton_loadFiles_clicked()
 {
+    hasInit = false;
     //choose directory
     QString folderpath = QFileDialog::getExistingDirectory(0, ("Choose Folder"), "/home/caitlin");
     ui->lineEdit->setText(folderpath);
@@ -413,8 +420,16 @@ void MainWindow::on_pushButton_loadFiles_clicked()
 
     }
 
-}
+    load_trial_data("SELECT * FROM Trial");
+    load_node_data("SELECT * FROM Nodes");
+    load_target_data("SELECT * FROM Target");
+    load_pulse_data("SELECT * FROM Pulse");
+    load_weather_data("SELECT * FROM Weather");
 
+    ui->lineEdit->clear();
+    hasInit = true;
+
+}
 
 QString MainWindow::add_trial_data(QString filename)
 {
@@ -841,6 +856,9 @@ void MainWindow::add_weather_data(QString filename, QString fk_id)
 }
 
 
+
+
+
 void MainWindow::on_comboBox_5_currentIndexChanged(const QString &arg1)
 {
     ui->comboBox_3->clear();
@@ -858,7 +876,6 @@ void MainWindow::on_comboBox_27_currentIndexChanged(const QString &arg1)
     ui->comboBox_28->clear();
     ui->comboBox_28->addItems(search_field_options(arg1));
 }
-
 
 QStringList MainWindow::search_field_options(QString table)
 {
@@ -888,8 +905,25 @@ QStringList MainWindow::search_field_options(QString table)
     return fieldlist;
 }
 
+
+
+
 void MainWindow::on_pushButton_newSearchRow_clicked()
 {
+    QDynamicButton *button = new QDynamicButton(this);
+    button->setText("Button" + QString::number(button->getID()));
+
+    QDynamicLineEdit *lineedit = new QDynamicLineEdit(this);
+    lineedit->setText(QString::number(lineedit->getID()));
+
+    ui->verticalLayout_3->addWidget(button);
+    ui->verticalLayout_3->addWidget(lineedit);
+
+    connect(button, SIGNAL(clicked()), this, SLOT(slotGetButtonNumber()));
+
+
+
+
 //    QCheckBox* check1 = new QCheckBox();
 //    QComboBox* box1 = new QComboBox();
 //    QStringList tableChoice;
@@ -981,12 +1015,209 @@ void MainWindow::on_pushButton_search_clicked()
 
 void MainWindow::on_pushButton_clearSearch_clicked()
 {
-    //TO DO - clear and reset all search options
+    for (int i = 0; i < ui->verticalLayout_3->count(); i++)
+    {
+        QDynamicButton *button = qobject_cast<QDynamicButton*>(ui->verticalLayout_3->itemAt(i)->widget());
+        QDynamicLineEdit *lineedit = qobject_cast<QDynamicLineEdit*>(ui->verticalLayout_3->itemAt(i+1)->widget());
+        if (button->getID() == ui->lineEdit->text().toInt())
+        {
+            button->hide();
+            delete button;
+            lineedit->hide();
+            delete lineedit;
+        }
+    }
 
+
+
+
+
+    //TO DO - clear and reset all search options
+    hasInit = false;
     load_trial_data("SELECT * FROM Trial");
-    load_node_data("SELECT * FROM Node");
+    load_node_data("SELECT * FROM Nodes");
     load_target_data("SELECT * FROM Target");
     load_pulse_data("SELECT * FROM Pulse");
     load_weather_data("SELECT * FROM Weather");
+    hasInit = true;
 }
 
+void MainWindow::slotGetButtonNumber()
+{
+    QDynamicButton *button = (QDynamicButton*) sender();
+    ui->lineEdit->setText(QString::number(button->getID()));
+}
+
+void MainWindow::slotGetLineEditNumber()
+{
+    QDynamicLineEdit *lineedit = (QDynamicLineEdit*) sender();
+    ui->lineEdit_10->setText(QString::number(lineedit->getID()));
+}
+
+
+
+
+void MainWindow::on_tableWidget_trial_doubleClicked(const QModelIndex &index)
+{
+    ui->tableWidget_trial->resizeColumnsToContents();
+}
+
+void MainWindow::on_tableWidget_nodes_doubleClicked(const QModelIndex &index)
+{
+    ui->tableWidget_nodes->resizeColumnsToContents();
+}
+
+void MainWindow::on_tableWidget_target_doubleClicked(const QModelIndex &index)
+{
+    ui->tableWidget_target->resizeColumnsToContents();
+}
+
+void MainWindow::on_tableWidget_pulse_doubleClicked(const QModelIndex &index)
+{
+    ui->tableWidget_pulse->resizeColumnsToContents();
+}
+
+void MainWindow::on_tableWidget_weather_doubleClicked(const QModelIndex &index)
+{
+    ui->tableWidget_weather->resizeColumnsToContents();
+}
+
+void MainWindow::on_tableWidget_trial_itemChanged(QTableWidgetItem *item)
+{
+    if (hasInit == true) {
+        QString field = ui->tableWidget_trial->horizontalHeaderItem(item->column())->text();
+        QString pk_id = ui->tableWidget_trial->item(item->row(), 0)->data(0).toString();
+        QString value = ui->tableWidget_trial->item(item->row(), item->column())->data(0).toString();
+
+        switch(QMessageBox::warning(this, "Change Value", "You are about to change a value in the database.\nDo you want to continue?", "Cancel", "OK"))
+        {
+        case 0:
+            hasInit = false;
+            load_trial_data("SELECT * FROM Trial");
+            hasInit = true;
+            break;
+        case 1:
+            QSqlQuery query;
+            if (query.exec("UPDATE Trial SET " + field + " = '" + value + "' WHERE pk_id = '" + pk_id + "';"))
+            {
+                QMessageBox::information(this, "Update Success", "Value updated in database.");
+            }
+            else
+            {
+                qDebug() << query.lastError().text();
+            }
+        }
+    }
+}
+
+void MainWindow::on_tableWidget_nodes_itemChanged(QTableWidgetItem *item)
+{
+    if (hasInit == true) {
+        QString field = ui->tableWidget_nodes->horizontalHeaderItem(item->column())->text();
+        QString fk_id = ui->tableWidget_nodes->item(item->row(), 0)->data(0).toString();
+        QString value = ui->tableWidget_nodes->item(item->row(), item->column())->data(0).toString();
+
+        switch(QMessageBox::warning(this, "Change Value", "You are about to change a value in the database.\nDo you want to continue?", "Cancel", "OK"))
+        {
+        case 0:
+            hasInit = false;
+            load_trial_data("SELECT * FROM Nodes");
+            hasInit = true;
+            break;
+        case 1:
+            QSqlQuery query;
+            if (query.exec("UPDATE Nodes SET " + field + " = '" + value + "' WHERE fk_id = '" + fk_id + "';"))
+            {
+                QMessageBox::information(this, "Update Success", "Value updated in database.");
+            }
+            else
+            {
+                qDebug() << query.lastError().text();
+            }
+        }
+    }
+}
+
+void MainWindow::on_tableWidget_target_itemChanged(QTableWidgetItem *item)
+{
+    if (hasInit == true) {
+        QString field = ui->tableWidget_target->horizontalHeaderItem(item->column())->text();
+        QString fk_id = ui->tableWidget_target->item(item->row(), 0)->data(0).toString();
+        QString value = ui->tableWidget_target->item(item->row(), item->column())->data(0).toString();
+
+        switch(QMessageBox::warning(this, "Change Value", "You are about to change a value in the database.\nDo you want to continue?", "Cancel", "OK"))
+        {
+        case 0:
+            hasInit = false;
+            load_trial_data("SELECT * FROM Target");
+            hasInit = true;
+            break;
+        case 1:
+            QSqlQuery query;
+            if (query.exec("UPDATE Target SET " + field + " = '" + value + "' WHERE fk_id = '" + fk_id + "';"))
+            {
+                QMessageBox::information(this, "Update Success", "Value updated in database.");
+            }
+            else
+            {
+                qDebug() << query.lastError().text();
+            }
+        }
+    }
+}
+
+void MainWindow::on_tableWidget_pulse_itemChanged(QTableWidgetItem *item)
+{
+    if (hasInit == true) {
+        QString field = ui->tableWidget_pulse->horizontalHeaderItem(item->column())->text();
+        QString fk_id = ui->tableWidget_pulse->item(item->row(), 0)->data(0).toString();
+        QString value = ui->tableWidget_pulse->item(item->row(), item->column())->data(0).toString();
+
+        switch(QMessageBox::warning(this, "Change Value", "You are about to change a value in the database.\nDo you want to continue?", "Cancel", "OK"))
+        {
+        case 0:
+            hasInit = false;
+            load_trial_data("SELECT * FROM Pulse");
+            hasInit = true;
+            break;
+        case 1:
+            QSqlQuery query;
+            if (query.exec("UPDATE Pulse SET " + field + " = '" + value + "' WHERE fk_id = '" + fk_id + "';"))
+            {
+                QMessageBox::information(this, "Update Success", "Value updated in database.");
+            }
+            else
+            {
+                qDebug() << query.lastError().text();
+            }
+        }
+    }
+}
+
+void MainWindow::on_tableWidget_weather_itemChanged(QTableWidgetItem *item)
+{
+    if (hasInit == true) {
+        QString field = ui->tableWidget_weather->horizontalHeaderItem(item->column())->text();
+        QString fk_id = ui->tableWidget_weather->item(item->row(), 0)->data(0).toString();
+        QString value = ui->tableWidget_weather->item(item->row(), item->column())->data(0).toString();
+
+        switch(QMessageBox::warning(this, "Change Value", "You are about to change a value in the database.\nDo you want to continue?", "Cancel", "OK"))
+        {
+        case 0:
+            hasInit = false;
+            load_trial_data("SELECT * FROM Weather");
+            hasInit = true;
+            break;
+        case 1:
+            QSqlQuery query;
+            if (query.exec("UPDATE Weather SET " + field + " = '" + value + "' WHERE fk_id = '" + fk_id + "';"))
+            {
+                QMessageBox::information(this, "Update Success", "Value updated in database.");
+            }
+            else
+            {
+                qDebug() << query.lastError().text();
+            }
+        }
+    }
+}

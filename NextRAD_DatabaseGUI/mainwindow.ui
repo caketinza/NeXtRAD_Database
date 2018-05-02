@@ -21,7 +21,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab_trial">
        <attribute name="title">
@@ -49,22 +49,22 @@
           </column>
           <column>
            <property name="text">
-            <string>Archive Name</string>
+            <string>ArchiveName</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Trial Date</string>
+            <string>TrialDate</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Start Time</string>
+            <string>StartTime</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Trial Location</string>
+            <string>TrialLocation</string>
            </property>
           </column>
           <column>
@@ -95,102 +95,102 @@
           </column>
           <column>
            <property name="text">
-            <string>Node 0 Location Lat</string>
+            <string>Node0LocationLat</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 0 Location Lon</string>
+            <string>Node0LocationLon</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 0 Location Ht</string>
+            <string>Node0LocationHt</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 1 Location Lat</string>
+            <string>Node1LocationLat</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 1 Location Lon</string>
+            <string>Node1LocationLon</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 1 Location Ht</string>
+            <string>Node1LocationHt</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 2 Location Lat</string>
+            <string>Node2LocationLat</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 2 Location Lon</string>
+            <string>Node2LocationLon</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 2 Location Ht</string>
+            <string>Node2LocationHt</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>DTG of Bearing</string>
+            <string>DTGofBearing</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Baseline Bisector</string>
+            <string>BaselineBisector</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 0 Range</string>
+            <string>Node0Range</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 0 Bearing</string>
+            <string>Node0Bearing</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 1 Range</string>
+            <string>Node1Range</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 1 Bearing</string>
+            <string>Node1Bearing</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 2 Range</string>
+            <string>Node2Range</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Node 2 Bearing</string>
+            <string>Node2Bearing</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Bistatic Angle 0_1</string>
+            <string>BistaticAngle0_1</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Bistatic Angle 0_2</string>
+            <string>BistaticAngle0_2</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Bistatic Angle 1_2</string>
+            <string>BistaticAngle1_2</string>
            </property>
           </column>
          </widget>
@@ -211,32 +211,32 @@
           </column>
           <column>
            <property name="text">
-            <string>Target Location Lat</string>
+            <string>TgtLocationLat</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Target Location Lon</string>
+            <string>TgtLocationLon</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Target Location Ht</string>
+            <string>TgtLocationHt</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Target Type</string>
+            <string>TgtType</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Target Area</string>
+            <string>TgtArea</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Target Speed</string>
+            <string>TgtSpeed</string>
            </property>
           </column>
          </widget>
@@ -262,27 +262,27 @@
           </column>
           <column>
            <property name="text">
-            <string>Num. of PRIs</string>
+            <string>NumOfPRIs</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Samples per PRI</string>
+            <string>SamplesPerPRI</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>DAC Delay</string>
+            <string>DACDelay</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>ADC Delay</string>
+            <string>ADCDelay</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Pol. Order</string>
+            <string>PolOrder</string>
            </property>
           </column>
           <column>
@@ -297,12 +297,12 @@
           </column>
           <column>
            <property name="text">
-            <string>L-Band Waveform Freq.</string>
+            <string>LBandWaveformFreq</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>X-Band Waveform Freq.</string>
+            <string>XBandWaveformFreq</string>
            </property>
           </column>
          </widget>
@@ -326,42 +326,42 @@
           </column>
           <column>
            <property name="text">
-            <string>Douglas Sea State</string>
+            <string>DouglasSeaState</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Wind Speed</string>
+            <string>WindSpeed</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Wind Direction</string>
+            <string>WindDir</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Wave Height</string>
+            <string>WaveHeight</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Wave Direction</string>
+            <string>WaveDir</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Wave Period</string>
+            <string>WavePeriod</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Air Temperature</string>
+            <string>AirTemperature</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Air Pressure</string>
+            <string>AirPressure</string>
            </property>
           </column>
          </widget>
@@ -835,6 +835,9 @@
           <string>Search</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_3"/>
        </item>
       </layout>
      </widget>

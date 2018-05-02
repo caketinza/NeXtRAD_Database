@@ -14,8 +14,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    qdynamicbutton.cpp \
+    qdynamiclineedit.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    qdynamicbutton.h \
+    qdynamiclineedit.h
 
 FORMS    += mainwindow.ui
