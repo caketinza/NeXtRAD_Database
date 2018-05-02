@@ -21,7 +21,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_trial">
        <attribute name="title">
@@ -100,7 +100,7 @@
           </column>
           <column>
            <property name="text">
-            <string>Node 1 Location Lon</string>
+            <string>Node 0 Location Lon</string>
            </property>
           </column>
           <column>
@@ -190,7 +190,7 @@
           </column>
           <column>
            <property name="text">
-            <string>Bistatic Angle 2_0</string>
+            <string>Bistatic Angle 1_2</string>
            </property>
           </column>
          </widget>
@@ -432,6 +432,13 @@
           <widget class="QPushButton" name="pushButton_newSearchRow">
            <property name="text">
             <string>Add New Search Row</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_clearSearch">
+           <property name="text">
+            <string>Clear Search</string>
            </property>
           </widget>
          </item>

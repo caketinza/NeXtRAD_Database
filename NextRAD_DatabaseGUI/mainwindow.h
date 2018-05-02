@@ -50,10 +50,26 @@ private slots:
 
     void on_pushButton_newSearchRow_clicked();
 
+    void on_pushButton_clearSearch_clicked();
+
+    QString add_trial_data(QString filename);
+
+    void add_node_data(QString filename, QString fk_id);
+
+    void add_pulse_data(QString filename, QString fk_id);
+
+    void add_target_data(QString filename, QString fk_id);
+
+    void add_weather_data(QString filename, QString fk_id);
+
+
+    QStringList search_field_options(QString table);
+
 private:
     Ui::MainWindow *ui;
     bool hasInit;
-    int whichTable;
+    int numTerms;
+
     QString valueChoice0, valueChoice1, valueChoice2, valueChoice3, valueChoice4;
     QString fieldChoice0, fieldChoice1, fieldChoice2, fieldChoice3, fieldChoice4;
     QString tableChoice0, tableChoice1, tableChoice2, tableChoice3, tableChoice4;

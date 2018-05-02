@@ -7,13 +7,15 @@
 #include <QSettings>
 #include <QProcess>
 #include <QDirIterator>
+#include <QDir>
+#include <QFileInfo>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     hasInit = false;
-    whichTable = 0;
+    numTerms = 0;
 
     ui->setupUi(this);
 
@@ -44,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         qDebug() << "Failed to connect to NeXtRAD Database.";
     }
+
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()
@@ -71,8 +75,6 @@ bool MainWindow::load_trial_data(QString querytext)
         {
             while (query.next())
             {
-                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4) << query.value(5) << query.value(6);
-
                 QString primaryid = query.value(0).toString();
                 QString archive = query.value(1).toString();
                 QString trialdate = query.value(2).toString();
@@ -123,10 +125,6 @@ bool MainWindow::load_node_data(QString querytext)
         {
             while (query.next())
             {
-                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4) << query.value(5) << query.value(6)
-                         << query.value(7) << query.value(8) << query.value(9) << query.value(10) << query.value(11) << query.value(12) << query.value(13)
-                         << query.value(14) << query.value(15) << query.value(16) << query.value(17);
-
                 QString foreignid = query.value(0).toString();
                 QString node0lat = query.value(1).toString();
                 QString node0lon = query.value(2).toString();
@@ -145,6 +143,9 @@ bool MainWindow::load_node_data(QString querytext)
                 QString node1bearing = query.value(15).toString();
                 QString node2range = query.value(16).toString();
                 QString node2bearing = query.value(17).toString();
+                QString bistatic01 = query.value(18).toString();
+                QString bistatic02 = query.value(19).toString();
+                QString bistatic12 = query.value(20).toString();
 
                 ui->tableWidget_nodes->setRowCount(ui->tableWidget_nodes->rowCount() + 1);
 
@@ -166,6 +167,9 @@ bool MainWindow::load_node_data(QString querytext)
                 QTableWidgetItem* node1bearingItem = new QTableWidgetItem(node1bearing);
                 QTableWidgetItem* node2rangeItem = new QTableWidgetItem(node2range);
                 QTableWidgetItem* node2bearingItem = new QTableWidgetItem(node2bearing);
+                QTableWidgetItem* bistatic01Item = new QTableWidgetItem(bistatic01);
+                QTableWidgetItem* bistatic02Item = new QTableWidgetItem(bistatic02);
+                QTableWidgetItem* bistatic12Item = new QTableWidgetItem(bistatic12);
 
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 0, foreignidItem);
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 1, node0latItem);
@@ -185,6 +189,9 @@ bool MainWindow::load_node_data(QString querytext)
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 15, node1bearingItem);
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 16, node2rangeItem);
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 17, node2bearingItem);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 18, bistatic01Item);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 19, bistatic02Item);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 20, bistatic12Item);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
@@ -209,8 +216,6 @@ bool MainWindow::load_target_data(QString querytext)
         {
             while (query.next())
             {
-                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4) << query.value(5) << query.value(6);
-
                 QString foreignid = query.value(0).toString();
                 QString tgtloclat = query.value(1).toString();
                 QString tgtloclon = query.value(2).toString();
@@ -260,9 +265,6 @@ bool MainWindow::load_pulse_data(QString querytext)
         {
             while (query.next())
             {
-                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4) << query.value(5)
-                         << query.value(6) << query.value(7) << query.value(8) << query.value(9) << query.value(10);
-
                 QString foreignid = query.value(0).toString();
                 QString waveform = query.value(1).toString();
                 QString numPRIs = query.value(2).toString();
@@ -324,9 +326,6 @@ bool MainWindow::load_weather_data(QString querytext)
         {
             while (query.next())
             {
-                qDebug() << query.value(0) << query.value(1) << query.value(2) << query.value(3) << query.value(4)
-                         << query.value(5) << query.value(6) << query.value(7) << query.value(8);
-
                 QString foreignid = query.value(0).toString();
                 QString seastate = query.value(1).toString();
                 QString windspeed = query.value(2).toString();
@@ -372,18 +371,55 @@ bool MainWindow::load_weather_data(QString querytext)
 
 
 
-
 void MainWindow::on_pushButton_loadFile_clicked()
 {
     //choose a file
-    QString filename = QFileDialog::getOpenFileName(this, tr("Choose File"), "/home/caitlin", tr("Header Files(*.ini);;Text Files (*.txt)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("Choose File"), "/home/caitlin", tr("Header Files(*.ini)"));
     ui->lineEdit->setText(filename);
 
+    QString fk_id = add_trial_data(filename);
+    add_node_data(filename, fk_id);
+    add_target_data(filename, fk_id);
+    add_pulse_data(filename, fk_id);
+    add_weather_data(filename, fk_id);
+
+    ui->lineEdit->clear();
+}
+
+void MainWindow::on_pushButton_loadFiles_clicked()
+{
+    //choose directory
+    QString folderpath = QFileDialog::getExistingDirectory(0, ("Choose Folder"), "/home/caitlin");
+    ui->lineEdit->setText(folderpath);
+
+    QDir dir(folderpath);
+
+    if (!dir.exists())
+    {
+        qWarning("The directory does not exist");
+    }
+
+    QDirIterator qdir(dir.absolutePath(), QStringList() << "*.ini", QDir::NoSymLinks | QDir::Files, QDirIterator::Subdirectories);
+
+    while (qdir.hasNext())
+    {
+        QString filename = qdir.next();
+
+        QString fk_id = add_trial_data(filename);
+        add_node_data(filename, fk_id);
+        add_target_data(filename, fk_id);
+        add_pulse_data(filename, fk_id);
+        add_weather_data(filename, fk_id);
+
+    }
+
+}
 
 
+QString MainWindow::add_trial_data(QString filename)
+{
     //load a file into the database
     QSettings settings(filename, QSettings::IniFormat);
-
 
     //load timings into Trial table
     settings.beginGroup("Timing");
@@ -411,15 +447,30 @@ void MainWindow::on_pushButton_loadFile_clicked()
     settings.endGroup();
 
     QSqlQuery query;
-    if (query.exec("INSERT INTO Trial (ArchiveName, TrialDate, StartTime) VALUES ('" + archivename + "','" + trialdate + "','" + starttime + "')"))
+
+    if (query.exec("INSERT INTO Trial (ArchiveName, TrialDate, StartTime, TrialLocation, Comments) VALUES ('" + archivename + "','" + trialdate + "','" + starttime + "','" + "-" + "','" +"-"+ "')"))
     {
         QMessageBox::information(this, "Update Success", "Trial data added to database.");
     }
     else
     {
         qDebug() << query.lastError().text();
+        switch(QMessageBox::warning(this, "Duplicate Record", "This trial data has already been added.\nWould you like to overwrite the previous version?", "Cancel", "Yes",0,0,1))
+        {
+        case 0:
+            break;
+        case 1:
+            if (query.exec("UPDATE Trial SET TrialDate = '" + trialdate + "', StartTime = '" + starttime + "' WHERE ArchiveName = '" + archivename + "';"))
+            {
+                QMessageBox::information(this, "Update Success", "Trial data updated.");
+            }
+            else
+            {
+                qDebug() << query.lastError().text();
+            }
+            break;
+        }
     }
-
 
     QString fk_id;
     if (query.exec("SELECT pk_id FROM Trial WHERE ArchiveName = '" + archivename + "';"))
@@ -435,66 +486,132 @@ void MainWindow::on_pushButton_loadFile_clicked()
     {
         qDebug() << query.lastError().text();
     }
+    return fk_id;
+}
 
+void MainWindow::add_node_data(QString filename, QString fk_id)
+{
+    //load a file into the database
+    QSettings settings(filename, QSettings::IniFormat);
 
+    //load geometry and bearings into Nodes table
+    settings.beginGroup("GeometrySettings");
+    QStringList geomkeys = settings.allKeys();
+    QStringList geomKeys, geomValues;
+
+    foreach (const QString &childKey, geomkeys)
+    {
+        geomKeys << childKey;
+        if (settings.value(childKey).toString() ==  "")
+        {
+            geomValues << QString::number(NULL);
+        }
+        else
+        {
+            geomValues << settings.value(childKey).toString();
+        }
+    }
+
+    QString node0lat = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_LAT", 0));
+    QString node0lon = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_LON", 0));
+    QString node0ht = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_HT", 0));
+    QString node1lat = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_LAT", 0));
+    QString node1lon = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_LON", 0));
+    QString node1ht = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_HT", 0));
+    QString node2lat = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_LAT", 0));
+    QString node2lon = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_LON", 0));
+    QString node2ht = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_HT", 0));
+    settings.endGroup();
+
+    settings.beginGroup("Bearings");
+    QStringList bearkeys = settings.allKeys();
+    QStringList bearKeys, bearValues;
+
+    foreach (const QString &childKey, bearkeys)
+    {
+        bearKeys << childKey;
+        if (settings.value(childKey).toString() ==  "")
+        {
+            bearValues << QString::number(NULL);
+        }
+        else
+        {
+            bearValues << settings.value(childKey).toString();
+        }
+    }
+
+    QString dtg = bearValues.at(bearKeys.indexOf("DTG", 0));
+    QString basebi = bearValues.at(bearKeys.indexOf("BASELINE_BISECTOR", 0));
+    QString node0rng = bearValues.at(bearKeys.indexOf("NODE0_RANGE", 0));
+    QString node0bear = bearValues.at(bearKeys.indexOf("NODE0_BEARING", 0));
+    QString node1rng = bearValues.at(bearKeys.indexOf("NODE1_RANGE", 0));
+    QString node1bear = bearValues.at(bearKeys.indexOf("NODE1_BEARING", 0));
+    QString node2rng = bearValues.at(bearKeys.indexOf("NODE2_RANGE", 0));
+    QString node2bear = bearValues.at(bearKeys.indexOf("NODE2_BEARING", 0));
+
+    settings.endGroup();
+
+    QString bistatic0_1, bistatic0_2, bistatic1_2;
+    int temp1, temp2, temp3;
+
+    temp1 = node1bear.toInt() - node0bear.toInt();
+    temp2 = node2bear.toInt() - node0bear.toInt();
+    temp3 = node2bear.toInt() - node1bear.toInt();
+
+    if (temp1 < 0)
+    {
+        temp1 = temp1 + 360;
+    }
+    if (temp2 < 0)
+    {
+        temp2 = temp2 + 360;
+    }
+    if (temp3 < 0)
+    {
+        temp3 = temp3 + 360;
+    }
+
+    bistatic0_1 = QString::number(temp1);
+    bistatic0_2 = QString::number(temp2);
+    bistatic1_2 = QString::number(temp3);
+
+    QSqlQuery query;
     //previously been loaded check
     if (query.exec("SELECT fk_id FROM Nodes where fk_id = '" + fk_id + "'"))
     {
         query.next();
         if (query.value(0).toString() == fk_id)
         {
-            QMessageBox::warning(this, "Duplicate Data", "Node data previously added to database.");
+            switch(QMessageBox::warning(this, "Duplicate Record", "This node data has already been added.\nWould you like to overwrite the previous version?", "Cancel", "Yes",0,0,1))
+            {
+            case 0:
+                break;
+            case 1:
+                if (query.exec("UPDATE Nodes SET Node0LocationLat = '" + node0lat + "', Node0LocationLon = '" + node0lon + "', Node0LocationHt = '" + node0ht
+                               + "', Node1LocationLat = '" + node1lat + "', Node1LocationLon = '" + node1lon + "', Node1LocationHt = '" + node1ht
+                               + "', Node2LocationLat = '" + node2lat + "', Node2LocationLon = '" + node2lon + "', Node2LocationHt = '" + node2ht
+                               + "', DTGOfBearing = '" + dtg + "', BaselineBisector = '" + basebi + "', Node0Range = '" + node0rng + "', Node0Bearing = '" + node0bear
+                               + "', Node1Range = '" + node1rng + "', Node1Bearing = '" + node1bear + "', Node2Range = '" + node2rng + "', Node2Bearing = '" + node2bear
+                               + "', BistaticAngle0_1 = '" + bistatic0_1 + "', BistaticAngle0_2 = '" + bistatic0_2 + "', BistaticAngle1_2 = '" + bistatic1_2
+                               + "' WHERE fk_id = '" + fk_id + "';"))
+                {
+                    QMessageBox::information(this, "Update Success", "Node data updated.");
+                }
+                else
+                {
+                    qDebug() << query.lastError().text();
+                }
+                break;
+            }
         }
         else
         {
-            //load geometry and bearings into Nodes table
-            settings.beginGroup("GeometrySettings");
-            QStringList geomkeys = settings.allKeys();
-            QStringList geomKeys, geomValues;
-
-            foreach (const QString &childKey, geomkeys)
-            {
-                geomKeys << childKey;
-                geomValues << settings.value(childKey).toString();
-            }
-
-            QString node0lat = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_LAT", 0));
-            QString node0lon = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_LON", 0));
-            QString node0ht = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_HT", 0));
-            QString node1lat = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_LAT", 0));
-            QString node1lon = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_LON", 0));
-            QString node1ht = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_HT", 0));
-            QString node2lat = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_LAT", 0));
-            QString node2lon = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_LON", 0));
-            QString node2ht = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_HT", 0));
-            settings.endGroup();
-
-            settings.beginGroup("Bearings");
-            QStringList bearkeys = settings.allKeys();
-            QStringList bearKeys, bearValues;
-
-            foreach (const QString &childKey, bearkeys)
-            {
-                bearKeys << childKey;
-                bearValues << settings.value(childKey).toString();
-            }
-
-            QString dtg = bearValues.at(bearKeys.indexOf("DTG", 0));
-            QString basebi = bearValues.at(bearKeys.indexOf("BASELINE_BISECTOR", 0));
-            QString node0rng = bearValues.at(bearKeys.indexOf("NODE0_RANGE", 0));
-            QString node0bear = bearValues.at(bearKeys.indexOf("NODE0_BEARING", 0));
-            QString node1rng = bearValues.at(bearKeys.indexOf("NODE1_RANGE", 0));
-            QString node1bear = bearValues.at(bearKeys.indexOf("NODE1_BEARING", 0));
-            QString node2rng = bearValues.at(bearKeys.indexOf("NODE2_RANGE", 0));
-            QString node2bear = bearValues.at(bearKeys.indexOf("NODE2_BEARING", 0));
-
-            settings.endGroup();
-
             if (query.exec("INSERT INTO Nodes (fk_id, Node0LocationLat, Node0LocationLon, Node0LocationHt, Node1LocationLat, Node1LocationLon, Node1LocationHt, "
                            "Node2LocationLat, Node2LocationLon, Node2LocationHt, DTGOfBearing, BaselineBisector, Node0Range, Node0Bearing, Node1Range, Node1Bearing, "
-                           "Node2Range, Node2Bearing) VALUES ('" + fk_id + "','" + node0lat + "','" + node0lon + "','" + node0ht + "','" + node1lat + "','" +
-                           node1lon + "','" + node1ht + "','" + node2lat + "','" + node2lon + "','" + node2ht + "','" + dtg + "','" + basebi + "','" +
-                           node0rng + "','" + node0bear + "','" + node1rng + "','" + node1bear + "','" + node2rng + "','" + node2bear + "')"))
+                           "Node2Range, Node2Bearing, BistaticAngle0_1, BistaticAngle0_2, BistaticAngle1_2) VALUES ('" + fk_id + "','" + node0lat + "','" + node0lon
+                           + "','" + node0ht + "','" + node1lat + "','" + node1lon + "','" + node1ht + "','" + node2lat + "','" + node2lon + "','" + node2ht + "','"
+                           + dtg + "','" + basebi + "','" + node0rng + "','" + node0bear + "','" + node1rng + "','" + node1bear + "','" + node2rng + "','" + node2bear
+                           + "','" + bistatic0_1 + "','" + bistatic0_2 + "','" + bistatic1_2 + "')"))
             {
                 QMessageBox::information(this, "Update Success", "Node data added to database.");
             }
@@ -504,82 +621,71 @@ void MainWindow::on_pushButton_loadFile_clicked()
             }
         }
     }
+}
 
+void MainWindow::add_pulse_data(QString filename, QString fk_id)
+{
+    //load a file into the database
+    QSettings settings(filename, QSettings::IniFormat);
 
-    //previously been loaded check
-    if (query.exec("SELECT fk_id FROM Target where fk_id = '" + fk_id + "'"))
+    //load pulses in Pulse table
+    settings.beginGroup("PulseParameters");
+    QStringList pulsekeys = settings.allKeys();
+    QStringList pulseKeys, pulseValues;
+
+    foreach (const QString &childKey, pulsekeys)
     {
-        query.next();
-        if (query.value(0).toString() == fk_id)
+        pulseKeys << childKey;
+        if (settings.value(childKey).toString() ==  "")
         {
-            QMessageBox::warning(this, "Duplicate Data", "Target data previously added to database.");
+            pulseValues << QString::number(NULL);
         }
         else
         {
-            //load target in Target table
-            settings.beginGroup("TargetSettings");
-            QStringList tgtkeys = settings.allKeys();
-            QStringList tgtKeys, tgtValues;
-
-            foreach (const QString &childKey, tgtkeys)
-            {
-                tgtKeys << childKey;
-                tgtValues << settings.value(childKey).toString();
-            }
-
-            QString tgtlat = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_LAT", 0));
-            QString tgtlon = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_LON", 0));
-            QString tgtht = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_HT", 0));
-
-
-            settings.endGroup();
-
-            if (query.exec("INSERT INTO Target (fk_id, TgtLocationLat, TgtLocationLon, TgtLocationHt) VALUES ('" + fk_id + "','" + tgtlat + "','" + tgtlon + "','" + tgtht + "');"))
-            {
-                QMessageBox::information(this, "Update Success", "Target data added to database.");
-            }
-            else
-            {
-                qDebug() << query.lastError().text();
-            }
+            pulseValues << settings.value(childKey).toString();
         }
     }
 
+    QString wave = pulseValues.at(pulseKeys.indexOf("WAVEFORM_INDEX", 0));
+    QString numPRI = pulseValues.at(pulseKeys.indexOf("NUM_PRIS", 0));
+    QString samples = pulseValues.at(pulseKeys.indexOf("SAMPLES_PER_PRI", 0));
+    QString dacdelay = pulseValues.at(pulseKeys.indexOf("DAC_DELAY", 0));
+    QString adcdelay = pulseValues.at(pulseKeys.indexOf("ADC_DELAY", 0));
+    QString polorder = pulseValues.at(pulseKeys.indexOf("POL_ORDER", 0));
+    QString PRI = pulseValues.at(pulseKeys.indexOf("PRI", 0));
+    QString prepulse = pulseValues.at(pulseKeys.indexOf("PRE_PULSE", 0));
+    QString lbandf = pulseValues.at(pulseKeys.indexOf("L_BAND_WAVEFORM_FREQ", 0));
+    QString xbandf = pulseValues.at(pulseKeys.indexOf("X_BAND_WAVEFORM_FREQ", 0));
 
+    settings.endGroup();
+
+    QSqlQuery query;
     //previously been loaded check
     if (query.exec("SELECT fk_id FROM Pulse where fk_id = '" + fk_id + "'"))
     {
         query.next();
         if (query.value(0).toString() == fk_id)
         {
-            QMessageBox::warning(this, "Duplicate Data", "Pulse data previously added to database.");
+            switch(QMessageBox::warning(this, "Duplicate Record", "This pulse data has already been added.\nWould you like to overwrite the previous version?", "Cancel", "Yes",0,0,1))
+            {
+            case 0:
+                break;
+            case 1:
+                if (query.exec("UPDATE Pulse SET Waveform = '" + wave + "', NumOfPRIs = '" + numPRI + "', SamplesPerPRI = '" + samples + "', DACDelay = '" + dacdelay
+                               + "', ADCDelay = '" + adcdelay + "', PolOrder = '" + polorder + "', PRI = '" + PRI + "', PrePulse = '" + prepulse + "', LBandWaveformFreq = '" + lbandf
+                               + "', XBandWaveformFreq = '" + xbandf + "' WHERE fk_id = '" + fk_id + "';"))
+                {
+                    QMessageBox::information(this, "Update Success", "Pulse data updated.");
+                }
+                else
+                {
+                    qDebug() << query.lastError().text();
+                }
+                break;
+            }
         }
         else
         {
-            //load pulses in Pulse table
-            settings.beginGroup("PulseParameters");
-            QStringList pulsekeys = settings.allKeys();
-            QStringList pulseKeys, pulseValues;
-
-            foreach (const QString &childKey, pulsekeys)
-            {
-                pulseKeys << childKey;
-                pulseValues << settings.value(childKey).toString();
-            }
-
-            QString wave = pulseValues.at(pulseKeys.indexOf("WAVEFORM_INDEX", 0));
-            QString numPRI = pulseValues.at(pulseKeys.indexOf("NUM_PRIS", 0));
-            QString samples = pulseValues.at(pulseKeys.indexOf("SAMPLES_PER_PRI", 0));
-            QString dacdelay = pulseValues.at(pulseKeys.indexOf("DAC_DELAY", 0));
-            QString adcdelay = pulseValues.at(pulseKeys.indexOf("ADC_DELAY", 0));
-            QString polorder = pulseValues.at(pulseKeys.indexOf("POL_ORDER", 0));
-            QString PRI = pulseValues.at(pulseKeys.indexOf("PRI", 0));
-            QString prepulse = pulseValues.at(pulseKeys.indexOf("PRE_PULSE", 0));
-            QString lbandf = pulseValues.at(pulseKeys.indexOf("L_BAND_WAVEFORM_FREQ", 0));
-            QString xbandf = pulseValues.at(pulseKeys.indexOf("X_BAND_WAVEFORM_FREQ", 0));
-
-            settings.endGroup();
-
             if (query.exec("INSERT INTO Pulse (fk_id, Waveform, NumOfPRIs, SamplesPerPRI, DACDelay, ADCDelay, PolOrder, PRI, PrePulse, LBandWaveformFreq, XBandWaveformFreq) "
                            "VALUES ('" + fk_id + "','" + wave + "','" + numPRI + "','" + samples + "','" + dacdelay + "','" + adcdelay + "','" + polorder + "','" +
                            PRI + "','" + prepulse + "','" + lbandf + "','" + xbandf + "');"))
@@ -592,40 +698,135 @@ void MainWindow::on_pushButton_loadFile_clicked()
             }
         }
     }
+}
 
+void MainWindow::add_target_data(QString filename, QString fk_id)
+{
+    //load a file into the database
+    QSettings settings(filename, QSettings::IniFormat);
 
+    //load target in Target table
+    settings.beginGroup("TargetSettings");
+    QStringList tgtkeys = settings.allKeys();
+    QStringList tgtKeys, tgtValues;
+
+    foreach (const QString &childKey, tgtkeys)
+    {
+        tgtKeys << childKey;
+        if (settings.value(childKey).toString() ==  "")
+        {
+            tgtValues << QString::number(NULL);
+        }
+        else
+        {
+            tgtValues << settings.value(childKey).toString();
+        }
+    }
+
+    QString tgtlat = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_LAT", 0));
+    QString tgtlon = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_LON", 0));
+    QString tgtht = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_HT", 0));
+
+    settings.endGroup();
+
+    QSqlQuery query;
+    //previously been loaded check
+    if (query.exec("SELECT fk_id FROM Target where fk_id = '" + fk_id + "'"))
+    {
+        query.next();
+        if (query.value(0).toString() == fk_id)
+        {
+            switch(QMessageBox::warning(this, "Duplicate Record", "This target data has already been added.\nWould you like to overwrite the previous version?", "Cancel", "Yes",0,0,1))
+            {
+            case 0:
+                break;
+            case 1:
+                if (query.exec("UPDATE Target SET TgtLocationLat = '" + tgtlat + "', TgtLocationLon = '" + tgtlon + "', TgtLocationHt = '" + tgtht + "' WHERE fk_id = '" + fk_id + "';"))
+                {
+                    QMessageBox::information(this, "Update Success", "Target data updated.");
+                }
+                else
+                {
+                    qDebug() << query.lastError().text();
+                }
+                break;
+            }
+        }
+        else
+        {
+            if (query.exec("INSERT INTO Target (fk_id, TgtLocationLat, TgtLocationLon, TgtLocationHt) VALUES ('" + fk_id + "','" + tgtlat + "','" + tgtlon + "','" + tgtht + "');"))
+            {
+                QMessageBox::information(this, "Update Success", "Target data added to database.");
+            }
+            else
+            {
+                qDebug() << query.lastError().text();
+            }
+        }
+    }
+}
+
+void MainWindow::add_weather_data(QString filename, QString fk_id)
+{
+    //load a file into the database
+    QSettings settings(filename, QSettings::IniFormat);
+
+    //load weather in Weather table
+    settings.beginGroup("Weather");
+    QStringList weatherkeys = settings.allKeys();
+    QStringList weatherKeys, weatherValues;
+
+    foreach (const QString &childKey, weatherkeys)
+    {
+        weatherKeys << childKey;
+        if (settings.value(childKey).toString() ==  "")
+        {
+            weatherValues << QString::number(NULL);
+        }
+        else
+        {
+            weatherValues << settings.value(childKey).toString();
+        }
+    }
+
+    QString seastate = weatherValues.at(weatherKeys.indexOf("DOUGLAS_SEA_STATE", 0));
+    QString windspd = weatherValues.at(weatherKeys.indexOf("WIND_SPEED", 0));
+    QString winddir = weatherValues.at(weatherKeys.indexOf("WIND_DIR", 0));
+    QString waveht = weatherValues.at(weatherKeys.indexOf("WAVE_HEIGHT", 0));
+    QString wavedir = weatherValues.at(weatherKeys.indexOf("WAVE_DIR", 0));
+    QString waveper = weatherValues.at(weatherKeys.indexOf("WAVE_PERIOD", 0));
+    QString airtemp = weatherValues.at(weatherKeys.indexOf("AIR_TEMPERATURE", 0));
+    QString airpress = weatherValues.at(weatherKeys.indexOf("AIR_PRESSURE", 0));
+
+    settings.endGroup();
+
+    QSqlQuery query;
     //previously been loaded check
     if (query.exec("SELECT fk_id FROM Weather where fk_id = '" + fk_id + "'"))
     {
         query.next();
         if (query.value(0).toString() == fk_id)
         {
-            QMessageBox::warning(this, "Duplicate Data", "Weather data previously added to database.");
+            switch(QMessageBox::warning(this, "Duplicate Record", "This weather data has already been added.\nWould you like to overwrite the previous version?", "Cancel", "Yes",0,0,1))
+            {
+            case 0:
+                break;
+            case 1:
+                if (query.exec("UPDATE Weather SET DouglasSeaState = '" + seastate + "', WindSpeed = '" + windspd + "', WindDir = '" + winddir + "', WaveHeight = '" + waveht
+                               + "', WaveDir = '" + wavedir + "', WavePeriod = '" + waveper + "', AirTemperature = '" + airtemp + "', AirPressure = '" + airpress
+                               + "' WHERE fk_id = '" + fk_id + "';"))
+                {
+                    QMessageBox::information(this, "Update Success", "Weather data updated.");
+                }
+                else
+                {
+                    qDebug() << query.lastError().text();
+                }
+                break;
+            }
         }
         else
         {
-            //load weather in Weather table
-            settings.beginGroup("Weather");
-            QStringList weatherkeys = settings.allKeys();
-            QStringList weatherKeys, weatherValues;
-
-            foreach (const QString &childKey, weatherkeys)
-            {
-                weatherKeys << childKey;
-                weatherValues << settings.value(childKey).toString();
-            }
-
-            QString seastate = weatherValues.at(weatherKeys.indexOf("DOUGLAS_SEA_STATE", 0));
-            QString windspd = weatherValues.at(weatherKeys.indexOf("WIND_SPEED", 0));
-            QString winddir = weatherValues.at(weatherKeys.indexOf("WIND_DIR", 0));
-            QString waveht = weatherValues.at(weatherKeys.indexOf("WAVE_HEIGHT", 0));
-            QString wavedir = weatherValues.at(weatherKeys.indexOf("WAVE_DIR", 0));
-            QString waveper = weatherValues.at(weatherKeys.indexOf("WAVE_PERIOD", 0));
-            QString airtemp = weatherValues.at(weatherKeys.indexOf("AIR_TEMPERATURE", 0));
-            QString airpress = weatherValues.at(weatherKeys.indexOf("AIR_PRESSURE", 0));
-
-            settings.endGroup();
-
             if (query.exec("INSERT INTO Weather (fk_id, DouglasSeaState, WindSpeed, WindDir, WaveHeight, WaveDir, WavePeriod, AirTemperature, AirPressure) VALUES ('" +
                            fk_id + "','" + seastate + "','" + windspd + "','" + winddir + "','" + waveht + "','" + wavedir + "','" + waveper + "','" + airtemp + "','" + airpress + "');"))
             {
@@ -637,523 +838,104 @@ void MainWindow::on_pushButton_loadFile_clicked()
             }
         }
     }
-
-    ui->lineEdit->clear();
-
 }
-
-void MainWindow::on_pushButton_loadFiles_clicked()
-{
-    //choose directory
-    QStringList help;
-    QDirIterator it("/home/caitlin/Downloads/Data", QStringList() << "*.ini", QDir::NoFilter, QDirIterator::Subdirectories);
-    while (it.hasNext())
-    {
-        help << it.next();
-
-        QString filename = it.next();
-        //ui->label_testing->setText(filename+" =   " + ui->label_testing->text());
-
-//        QSettings settings(filename, QSettings::IniFormat);
-
-//        settings.beginGroup("Timing");
-//        QStringList timkeys = settings.allKeys();
-
-//        QStringList timKeys, timValues;
-
-//        foreach (const QString &childKey, timkeys)
-//        {
-//            timKeys << childKey;
-//            timValues << settings.value(childKey).toString();
-//        }
-
-//        QString year = timValues.at(timKeys.indexOf("YEAR", 0));
-//        QString month = timValues.at(timKeys.indexOf("MONTH", 0));
-//        QString day = timValues.at(timKeys.indexOf("DAY", 0));
-//        QString hour = timValues.at(timKeys.indexOf("HOUR", 0));
-//        QString min = timValues.at(timKeys.indexOf("MINUTE", 0));
-//        QString sec = timValues.at(timKeys.indexOf("SECOND", 0));
-
-//        QString archivename = year + "-" + month + "-" + day + "_" + hour + ":" + min + ":" + sec;
-//        QString trialdate = year + "-" + month + "-" + day;
-//        QString starttime = hour + ":" + min + ":" + sec;
-
-//        settings.endGroup();
-
-//        QSqlQuery query;
-//        if (query.exec("INSERT INTO Trial (ArchiveName, TrialDate, StartTime) VALUES ('" + archivename + "','" + trialdate + "','" + starttime + "')"))
-//        {
-//            QMessageBox::information(this, "Update Success", "Trial data added to database.");
-//        }
-//        else
-//        {
-//            qDebug() << query.lastError().text();
-//        }
-
-
-    }
-
-
-//    //choose a file
-//    QString fileName = QFileDialog::getOpenFileName(this, tr("Choose File"), "/home/caitlin", tr("Header Files(*.ini);;Text Files (*.txt)"));
-//    ui->lineEdit->setText(fileName);
-
-//    //load a file into the database
-//    QSettings settings(fileName, QSettings::IniFormat);
-
-
-//    //load timings into Trial table
-//    settings.beginGroup("Timing");
-//    QStringList timkeys = settings.allKeys();
-
-//    QStringList timKeys, timValues;
-
-//    foreach (const QString &childKey, timkeys)
-//    {
-//        timKeys << childKey;
-//        timValues << settings.value(childKey).toString();
-//    }
-
-//    QString year = timValues.at(timKeys.indexOf("YEAR", 0));
-//    QString month = timValues.at(timKeys.indexOf("MONTH", 0));
-//    QString day = timValues.at(timKeys.indexOf("DAY", 0));
-//    QString hour = timValues.at(timKeys.indexOf("HOUR", 0));
-//    QString min = timValues.at(timKeys.indexOf("MINUTE", 0));
-//    QString sec = timValues.at(timKeys.indexOf("SECOND", 0));
-
-//    QString archivename = year + "-" + month + "-" + day + "_" + hour + ":" + min + ":" + sec;
-//    QString trialdate = year + "-" + month + "-" + day;
-//    QString starttime = hour + ":" + min + ":" + sec;
-
-//    settings.endGroup();
-
-//    QSqlQuery query;
-//    if (query.exec("INSERT INTO Trial (ArchiveName, TrialDate, StartTime) VALUES ('" + archivename + "','" + trialdate + "','" + starttime + "')"))
-//    {
-//        QMessageBox::information(this, "Update Success", "Trial data added to database.");
-//    }
-//    else
-//    {
-//        qDebug() << query.lastError().text();
-//    }
-
-
-//    QString fk_id;
-//    if (query.exec("SELECT pk_id FROM Trial WHERE ArchiveName = '" + archivename + "';"))
-//    {
-//        while (query.next())
-//        {
-//            qDebug() << query.value(0);
-
-//            fk_id = query.value(0).toString();
-//        }
-//    }
-//    else
-//    {
-//        qDebug() << query.lastError().text();
-//    }
-
-//    //previously been loaded check
-//    if (query.exec("SELECT fk_id FROM Nodes where fk_id = '" + fk_id + "'"))
-//    {
-//        query.next();
-//        if (query.value(0).toString() == fk_id)
-//        {
-//            ui->label_testing->setText("duplicate");
-//            QMessageBox::warning(this, "Duplicate Data", "Node data previously added to database.");
-//        }
-//        else
-//        {
-//            ui->label_testing->setText("not duplicate");
-//            //load geometry and bearings into Nodes table
-//            settings.beginGroup("GeometrySettings");
-//            QStringList geomkeys = settings.allKeys();
-//            QStringList geomKeys, geomValues;
-
-//            foreach (const QString &childKey, geomkeys)
-//            {
-//                geomKeys << childKey;
-//                geomValues << settings.value(childKey).toString();
-//            }
-
-//            QString node0lat = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_LAT", 0));
-//            QString node0lon = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_LON", 0));
-//            QString node0ht = geomValues.at(geomKeys.indexOf("NODE0_LOCATION_HT", 0));
-//            QString node1lat = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_LAT", 0));
-//            QString node1lon = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_LON", 0));
-//            QString node1ht = geomValues.at(geomKeys.indexOf("NODE1_LOCATION_HT", 0));
-//            QString node2lat = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_LAT", 0));
-//            QString node2lon = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_LON", 0));
-//            QString node2ht = geomValues.at(geomKeys.indexOf("NODE2_LOCATION_HT", 0));
-//            settings.endGroup();
-
-//            settings.beginGroup("Bearings");
-//            QStringList bearkeys = settings.allKeys();
-//            QStringList bearKeys, bearValues;
-
-//            foreach (const QString &childKey, bearkeys)
-//            {
-//                bearKeys << childKey;
-//                bearValues << settings.value(childKey).toString();
-//            }
-
-//            QString dtg = bearValues.at(bearKeys.indexOf("DTG", 0));
-//            QString basebi = bearValues.at(bearKeys.indexOf("BASELINE_BISECTOR", 0));
-//            QString node0rng = bearValues.at(bearKeys.indexOf("NODE0_RANGE", 0));
-//            QString node0bear = bearValues.at(bearKeys.indexOf("NODE0_BEARING", 0));
-//            QString node1rng = bearValues.at(bearKeys.indexOf("NODE1_RANGE", 0));
-//            QString node1bear = bearValues.at(bearKeys.indexOf("NODE1_BEARING", 0));
-//            QString node2rng = bearValues.at(bearKeys.indexOf("NODE2_RANGE", 0));
-//            QString node2bear = bearValues.at(bearKeys.indexOf("NODE2_BEARING", 0));
-
-//            settings.endGroup();
-
-//            if (query.exec("INSERT INTO Nodes (fk_id, Node0LocationLat, Node0LocationLon, Node0LocationHt, Node1LocationLat, Node1LocationLon, Node1LocationHt, "
-//                           "Node2LocationLat, Node2LocationLon, Node2LocationHt, DTGOfBearing, BaselineBisector, Node0Range, Node0Bearing, Node1Range, Node1Bearing, "
-//                           "Node2Range, Node2Bearing) VALUES ('" + fk_id + "','" + node0lat + "','" + node0lon + "','" + node0ht + "','" + node1lat + "','" +
-//                           node1lon + "','" + node1ht + "','" + node2lat + "','" + node2lon + "','" + node2ht + "','" + dtg + "','" + basebi + "','" +
-//                           node0rng + "','" + node0bear + "','" + node1rng + "','" + node1bear + "','" + node2rng + "','" + node2bear + "')"))
-//            {
-//                QMessageBox::information(this, "Update Success", "Node data added to database.");
-//            }
-//            else
-//            {
-//                qDebug() << query.lastError().text();
-//            }
-//        }
-//    }
-
-
-//    //previously been loaded check
-//    if (query.exec("SELECT fk_id FROM Target where fk_id = '" + fk_id + "'"))
-//    {
-//        query.next();
-//        if (query.value(0).toString() == fk_id)
-//        {
-//            ui->label_testing->setText("duplicate");
-//            QMessageBox::warning(this, "Duplicate Data", "Target data previously added to database.");
-//        }
-//        else
-//        {
-//            ui->label_testing->setText("not duplicate");
-
-//            //load target in Target table
-//            settings.beginGroup("TargetSettings");
-//            QStringList tgtkeys = settings.allKeys();
-//            QStringList tgtKeys, tgtValues;
-
-//            foreach (const QString &childKey, tgtkeys)
-//            {
-//                tgtKeys << childKey;
-//                tgtValues << settings.value(childKey).toString();
-//            }
-
-//            QString tgtlat = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_LAT", 0));
-//            QString tgtlon = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_LON", 0));
-//            QString tgtht = tgtValues.at(tgtKeys.indexOf("TGT_LOCATION_HT", 0));
-
-//            settings.endGroup();
-
-//            if (query.exec("INSERT INTO Target (fk_id, TgtLocationLat, TgtLocationLon, TgtLocationHt) VALUES ('" + fk_id + "','" + tgtlat + "','" + tgtlon + "','" + tgtht + "');"))
-//            {
-//                QMessageBox::information(this, "Update Success", "Target data added to database.");
-//            }
-//            else
-//            {
-//                qDebug() << query.lastError().text();
-//            }
-//        }
-//    }
-
-
-//    //previously been loaded check
-//    if (query.exec("SELECT fk_id FROM Pulse where fk_id = '" + fk_id + "'"))
-//    {
-//        query.next();
-//        if (query.value(0).toString() == fk_id)
-//        {
-//            ui->label_testing->setText("duplicate");
-//            QMessageBox::warning(this, "Duplicate Data", "Pulse data previously added to database.");
-//        }
-//        else
-//        {
-//            ui->label_testing->setText("not duplicate");
-
-//            //load pulses in Pulse table
-//            settings.beginGroup("PulseParameters");
-//            QStringList pulsekeys = settings.allKeys();
-//            QStringList pulseKeys, pulseValues;
-
-//            foreach (const QString &childKey, pulsekeys)
-//            {
-//                pulseKeys << childKey;
-//                pulseValues << settings.value(childKey).toString();
-//            }
-
-//            QString wave = pulseValues.at(pulseKeys.indexOf("WAVEFORM_INDEX", 0));
-//            QString numPRI = pulseValues.at(pulseKeys.indexOf("NUM_PRIS", 0));
-//            QString samples = pulseValues.at(pulseKeys.indexOf("SAMPLES_PER_PRI", 0));
-//            QString dacdelay = pulseValues.at(pulseKeys.indexOf("DAC_DELAY", 0));
-//            QString adcdelay = pulseValues.at(pulseKeys.indexOf("ADC_DELAY", 0));
-//            QString polorder = pulseValues.at(pulseKeys.indexOf("POL_ORDER", 0));
-//            QString PRI = pulseValues.at(pulseKeys.indexOf("PRI", 0));
-//            QString prepulse = pulseValues.at(pulseKeys.indexOf("PRE_PULSE", 0));
-//            QString lbandf = pulseValues.at(pulseKeys.indexOf("L_BAND_WAVEFORM_FREQ", 0));
-//            QString xbandf = pulseValues.at(pulseKeys.indexOf("X_BAND_WAVEFORM_FREQ", 0));
-
-//            settings.endGroup();
-
-//            if (query.exec("INSERT INTO Pulse (fk_id, Waveform, NumOfPRIs, SamplesPerPRI, DACDelay, ADCDelay, PolOrder, PRI, PrePulse, LBandWaveformFreq, XBandWaveformFreq) "
-//                           "VALUES ('" + fk_id + "','" + wave + "','" + numPRI + "','" + samples + "','" + dacdelay + "','" + adcdelay + "','" + polorder + "','" +
-//                           PRI + "','" + prepulse + "','" + lbandf + "','" + xbandf + "');"))
-//            {
-//                QMessageBox::information(this, "Update Success", "Pulse data added to database.");
-//            }
-//            else
-//            {
-//                qDebug() << query.lastError().text();
-//            }
-//        }
-//    }
-
-
-//    //previously been loaded check
-//    if (query.exec("SELECT fk_id FROM Weather where fk_id = '" + fk_id + "'"))
-//    {
-//        query.next();
-//        if (query.value(0).toString() == fk_id)
-//        {
-//            ui->label_testing->setText("duplicate");
-//            QMessageBox::warning(this, "Duplicate Data", "Weather data previously added to database.");
-//        }
-//        else
-//        {
-//            ui->label_testing->setText("not duplicate");
-//            //load weather in Weather table
-//            settings.beginGroup("Weather");
-//            QStringList weatherkeys = settings.allKeys();
-//            QStringList weatherKeys, weatherValues;
-
-//            foreach (const QString &childKey, weatherkeys)
-//            {
-//                weatherKeys << childKey;
-//                weatherValues << settings.value(childKey).toString();
-//            }
-
-//            QString seastate = weatherValues.at(weatherKeys.indexOf("DOUGLAS_SEA_STATE", 0));
-//            QString windspd = weatherValues.at(weatherKeys.indexOf("WIND_SPEED", 0));
-//            QString winddir = weatherValues.at(weatherKeys.indexOf("WIND_DIR", 0));
-//            QString waveht = weatherValues.at(weatherKeys.indexOf("WAVE_HEIGHT", 0));
-//            QString wavedir = weatherValues.at(weatherKeys.indexOf("WAVE_DIR", 0));
-//            QString waveper = weatherValues.at(weatherKeys.indexOf("WAVE_PERIOD", 0));
-//            QString airtemp = weatherValues.at(weatherKeys.indexOf("AIR_TEMPERATURE", 0));
-//            QString airpress = weatherValues.at(weatherKeys.indexOf("AIR_PRESSURE", 0));
-
-//            settings.endGroup();
-
-//            if (query.exec("INSERT INTO Weather (fk_id, DouglasSeaState, WindSpeed, WindDir, WaveHeight, WaveDir, WavePeriod, AirTemperature, AirPressure) VALUES ('" +
-//                           fk_id + "','" + seastate + "','" + windspd + "','" + winddir + "','" + waveht + "','" + wavedir + "','" + waveper + "','" + airtemp + "','" + airpress + "');"))
-//            {
-//                QMessageBox::information(this, "Update Success", "Weather data added to database.");
-//            }
-//            else
-//            {
-//                qDebug() << query.lastError().text();
-//            }
-//            ui->comboBox->setCurrentIndex(ui->comboBox->findText("Weather"));
-//        }
-//    }
-
-//    ui->lineEdit->clear();
-
-}
-
-
 
 
 void MainWindow::on_comboBox_5_currentIndexChanged(const QString &arg1)
 {
-    if (arg1 == "Trial")
-    {
-        QStringList triallist;
-        triallist << "ArchiveName" << "TrialDate" << "StartTime";
-        ui->comboBox_3->clear();
-        ui->comboBox_3->addItems(triallist);
-    }
-    else if (arg1 == "Nodes")
-    {
-        QStringList nodelist;
-        nodelist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
-                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "BaselineBisector" << "Node0Range" << "Node0Bearing"
-                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing";
-        ui->comboBox_3->clear();
-        ui->comboBox_3->addItems(nodelist);
-    }
-    else if (arg1 == "Target")
-    {
-        QStringList targetlist;
-        targetlist << "TgtLocationLat" << "TgtLocationLon" << "TgLocationHt";
-        ui->comboBox_3->clear();
-        ui->comboBox_3->addItems(targetlist);
-    }
-    else if (arg1 == "Pulse")
-    {
-        QStringList pulselist;
-        pulselist << "Waveform" << "NumOfPRIs" << "SamplesPerPRI" << "DACDelay" << "ADCDelay" << "PolOrder" << "PRI" << "PrePulse" << "LBandWaveformFreq" << "XBandWaveformFreq";
-        ui->comboBox_3->clear();
-        ui->comboBox_3->addItems(pulselist);
-    }
-    else if (arg1 == "Weather")
-    {
-        QStringList weatherlist;
-        weatherlist << "DouglasSeaState" << "WindSpeed" << "WindDir" << "WaveHeight" << "WaveDir" << "WavePeriod" << "AirTemperature" << "AirPressure";
-        ui->comboBox_3->clear();
-        ui->comboBox_3->addItems(weatherlist);
-    }
+    ui->comboBox_3->clear();
+    ui->comboBox_3->addItems(search_field_options(arg1));
 }
 
 void MainWindow::on_comboBox_23_currentIndexChanged(const QString &arg1)
 {
-    if (arg1 == "Trial")
-    {
-        QStringList triallist;
-        triallist << "ArchiveName" << "TrialDate" << "StartTime";
-        ui->comboBox_24->clear();
-        ui->comboBox_24->addItems(triallist);
-    }
-    else if (arg1 == "Nodes")
-    {
-        QStringList nodelist;
-        nodelist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
-                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "BaselineBisector" << "Node0Range" << "Node0Bearing"
-                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing";
-        ui->comboBox_24->clear();
-        ui->comboBox_24->addItems(nodelist);
-    }
-    else if (arg1 == "Target")
-    {
-        QStringList targetlist;
-        targetlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt";
-        ui->comboBox_24->clear();
-        ui->comboBox_24->addItems(targetlist);
-    }
-    else if (arg1 == "Pulse")
-    {
-        QStringList pulselist;
-        pulselist << "Waveform" << "NumOfPRIs" << "SamplesPerPRI" << "DACDelay" << "ADCDelay" << "PolOrder" << "PRI" << "PrePulse" << "LBandWaveformFreq" << "XBandWaveformFreq";
-        ui->comboBox_24->clear();
-        ui->comboBox_24->addItems(pulselist);
-    }
-    else if (arg1 == "Weather")
-    {
-        QStringList weatherlist;
-        weatherlist << "DouglasSeaState" << "WindSpeed" << "WindDir" << "WaveHeight" << "WaveDir" << "WavePeriod" << "AirTemperature" << "AirPressure";
-        ui->comboBox_24->clear();
-        ui->comboBox_24->addItems(weatherlist);
-    }
+    ui->comboBox_24->clear();
+    ui->comboBox_24->addItems(search_field_options(arg1));
 }
 
 void MainWindow::on_comboBox_27_currentIndexChanged(const QString &arg1)
 {
-    if (arg1 == "Trial")
-    {
-        QStringList triallist;
-        triallist << "ArchiveName" << "TrialDate" << "StartTime";
-        ui->comboBox_28->clear();
-        ui->comboBox_28->addItems(triallist);
-    }
-    else if (arg1 == "Nodes")
-    {
-        QStringList nodelist;
-        nodelist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
-                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "BaselineBisector" << "Node0Range" << "Node0Bearing"
-                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing";
-        ui->comboBox_28->clear();
-        ui->comboBox_28->addItems(nodelist);
-    }
-    else if (arg1 == "Target")
-    {
-        QStringList targetlist;
-        targetlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt";
-        ui->comboBox_28->clear();
-        ui->comboBox_28->addItems(targetlist);
-    }
-    else if (arg1 == "Pulse")
-    {
-        QStringList pulselist;
-        pulselist << "Waveform" << "NumOfPRIs" << "SamplesPerPRI" << "DACDelay" << "ADCDelay" << "PolOrder" << "PRI" << "PrePulse" << "LBandWaveformFreq" << "XBandWaveformFreq";
-        ui->comboBox_28->clear();
-        ui->comboBox_28->addItems(pulselist);
-    }
-    else if (arg1 == "Weather")
-    {
-        QStringList weatherlist;
-        weatherlist << "DouglasSeaState" << "WindSpeed" << "WindDir" << "WaveHeight" << "WaveDir" << "WavePeriod" << "AirTemperature" << "AirPressure";
-        ui->comboBox_28->clear();
-        ui->comboBox_28->addItems(weatherlist);
-    }
+    ui->comboBox_28->clear();
+    ui->comboBox_28->addItems(search_field_options(arg1));
 }
 
 
+QStringList MainWindow::search_field_options(QString table)
+{
+    QStringList fieldlist;
+    if (table == "Trial")
+    {
+        fieldlist << "ArchiveName" << "TrialDate" << "StartTime";
+    }
+    else if (table == "Nodes")
+    {
+        fieldlist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
+                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "BaselineBisector" << "Node0Range" << "Node0Bearing"
+                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing";
+    }
+    else if (table == "Target")
+    {
+        fieldlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt";
+    }
+    else if (table == "Pulse")
+    {
+        fieldlist << "Waveform" << "NumOfPRIs" << "SamplesPerPRI" << "DACDelay" << "ADCDelay" << "PolOrder" << "PRI" << "PrePulse" << "LBandWaveformFreq" << "XBandWaveformFreq";
+    }
+    else if (table == "Weather")
+    {
+        fieldlist << "DouglasSeaState" << "WindSpeed" << "WindDir" << "WaveHeight" << "WaveDir" << "WavePeriod" << "AirTemperature" << "AirPressure";
+    }
+    return fieldlist;
+}
 
 void MainWindow::on_pushButton_newSearchRow_clicked()
 {
-    QCheckBox* check1 = new QCheckBox();
-    QComboBox* box1 = new QComboBox();
-    QStringList valueChoicefieldChoice;
-    valueChoicefieldChoice << "Choose a table" << "Trial" << "Nodes" << "Target" << "Pulse" << "Weather";
-    box1->addItems(valueChoicefieldChoice);
-    QComboBox* box2 = new QComboBox();
-    box2->addItem("Choose a field");
-    QComboBox* box3 = new QComboBox();
-    QStringList equators;
-    equators << "=" << "<>" << ">" << "<" << ">=" << "<=";
-    box3->addItems(equators);
-    QLineEdit* line1 = new QLineEdit();
-    QPushButton* button1 = new QPushButton("Delete");
+//    QCheckBox* check1 = new QCheckBox();
+//    QComboBox* box1 = new QComboBox();
+//    QStringList tableChoice;
+//    tableChoice << "Choose a table" << "Trial" << "Nodes" << "Target" << "Pulse" << "Weather";
+//    box1->addItems(tableChoice);
+//    QComboBox* box2 = new QComboBox();
+//    box2->addItem("Choose a field");
+//    QComboBox* box3 = new QComboBox();
+//    QStringList equators;
+//    equators << "=" << "<>" << ">" << "<" << ">=" << "<=";
+//    box3->addItems(equators);
+//    QLineEdit* line1 = new QLineEdit();
+//    QPushButton* button1 = new QPushButton("Delete");
 
-
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->addWidget(check1);
-    layout->addWidget(box1);
-    layout->addWidget(box2);
-    layout->addWidget(box3);
-    layout->addWidget(line1);
-    layout->addWidget(button1);
-    ui->verticalLayout_2->addLayout(layout, 0);
+//    QHBoxLayout *layout = new QHBoxLayout;
+//    layout->addWidget(check1);
+//    layout->addWidget(box1);
+//    layout->addWidget(box2);
+//    layout->addWidget(box3);
+//    layout->addWidget(line1);
+//    layout->addWidget(button1);
+//    ui->verticalLayout_2->addLayout(layout, 0);
 }
 
 void MainWindow::on_pushButton_search_clicked()
 {
     QString querytext;
 
-    if (ui->checkBox->isChecked())
-    {
-        tableChoice0 = ui->comboBox_5->currentText();
-        fieldChoice0 = ui->comboBox_3->currentText();
-        valueChoice0 = ui->lineEdit_10->text();
-        equatorChoice0 = ui->comboBox_2->currentText();
-    }
+    tableChoice0 = ui->comboBox_5->currentText();
+    fieldChoice0 = ui->comboBox_3->currentText();
+    valueChoice0 = ui->lineEdit_10->text();
+    equatorChoice0 = ui->comboBox_2->currentText();
 
-    if (ui->checkBox_2->isChecked())
-    {
-        andor0 = ui->comboBox_31->currentText();
+    andor0 = ui->comboBox_31->currentText();
 
-        tableChoice1 = ui->comboBox_23->currentText();
-        fieldChoice1 = ui->comboBox_24->currentText();
-        valueChoice1 = ui->lineEdit_20->text();
-        equatorChoice1 = ui->comboBox_29->currentText();
-    }
+    tableChoice1 = ui->comboBox_23->currentText();
+    fieldChoice1 = ui->comboBox_24->currentText();
+    valueChoice1 = ui->lineEdit_20->text();
+    equatorChoice1 = ui->comboBox_29->currentText();
 
-    if (ui->checkBox_3->isChecked())
-    {
-        andor1 = ui->comboBox_32->currentText();
+    andor1 = ui->comboBox_32->currentText();
 
-        tableChoice2 = ui->comboBox_27->currentText();
-        fieldChoice2 = ui->comboBox_28->currentText();
-        valueChoice2 = ui->lineEdit_22->text();
-        equatorChoice2 = ui->comboBox_30->currentText();
-    }
+    tableChoice2 = ui->comboBox_27->currentText();
+    fieldChoice2 = ui->comboBox_28->currentText();
+    valueChoice2 = ui->lineEdit_22->text();
+    equatorChoice2 = ui->comboBox_30->currentText();
 
     if (ui->checkBox->isChecked())
     {
@@ -1197,4 +979,14 @@ void MainWindow::on_pushButton_search_clicked()
     }
 }
 
+void MainWindow::on_pushButton_clearSearch_clicked()
+{
+    //TO DO - clear and reset all search options
+
+    load_trial_data("SELECT * FROM Trial");
+    load_node_data("SELECT * FROM Node");
+    load_target_data("SELECT * FROM Target");
+    load_pulse_data("SELECT * FROM Pulse");
+    load_weather_data("SELECT * FROM Weather");
+}
 
