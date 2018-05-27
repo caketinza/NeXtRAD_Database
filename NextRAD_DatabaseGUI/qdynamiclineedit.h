@@ -11,6 +11,7 @@ public:
     ~QDynamicLineEdit();
     static int ResID;
     int getID();
+    void resetID();
 
 public slots:
 

@@ -16,10 +16,16 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     qdynamicbutton.cpp \
-    qdynamiclineedit.cpp
+    qdynamiclineedit.cpp \
+    qdynamiccombobox.cpp \
+    qsearchbar.cpp \
+    qandorbar.cpp
 
 HEADERS  += mainwindow.h \
     qdynamicbutton.h \
-    qdynamiclineedit.h
+    qdynamiclineedit.h \
+    qdynamiccombobox.h \
+    qsearchbar.h \
+    qandorbar.h
 
 FORMS    += mainwindow.ui

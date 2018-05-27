@@ -9,29 +9,34 @@
 #include <QDirIterator>
 #include <QDir>
 #include <QFileInfo>
+#include <QInputDialog>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     hasInit = false;
+    firstSearch = false;
 
     ui->setupUi(this);
 
     setWindowTitle("NeXtRAD Database");
 
     QStringList args;
-    args<< "-uroot" << "-pbubsy3726" << "nextrad" << "<" << "/home/caitlin/Documents/MSc/NeXtRAD_Database/nextrad.sql";
+    args<< "-uroot" << "-pbubsy3726" << "nextrad";
     QProcess process1;
-    process1.setStandardOutputFile("nextrad.sql");
+    process1.setStandardInputFile("nextrad.sql");
     process1.start("/usr/bin/mysql",args);
     process1.waitForFinished();
+
+    QString text = QInputDialog::getText(this, tr("MySQL Password"), tr("Please enter your MySQL password:"), QLineEdit::Normal);
 
     db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("localhost");
     db.setDatabaseName("nextrad");
     db.setUserName("root");
-    db.setPassword("bubsy3726");
+    db.setPassword(text);
 
     if (db.open())
     {
@@ -43,11 +48,13 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     else
     {
+        QMessageBox::warning(this, tr("NeXtRAD Database"), tr("Failed to connect to NeXtRAD Database."));
         qDebug() << "Failed to connect to NeXtRAD Database.";
     }
 
     ui->tabWidget->setCurrentIndex(0);
     hasInit = true;
+//    ui->pushButton_newSearchRow->setDisabled(true);
 }
 
 MainWindow::~MainWindow()
@@ -58,11 +65,11 @@ MainWindow::~MainWindow()
     process.setStandardOutputFile("nextrad.sql");
     process.start("/usr/bin/mysqldump",args);
     process.waitForFinished();
-    QFile::copy("/home/caitlin/build-NextRAD_DatabaseGUI-Desktop-Debug/nextrad.sql", "/home/caitlin/Documents/MSc/NeXtRAD_Database/nextrad.sql");
 
     db.close();
     delete ui;
 }
+
 
 bool MainWindow::load_trial_data(QString querytext)
 {
@@ -126,26 +133,26 @@ bool MainWindow::load_node_data(QString querytext)
             while (query.next())
             {
                 QString foreignid = query.value(0).toString();
-                QString node0lat = query.value(1).toString();
-                QString node0lon = query.value(2).toString();
-                QString node0ht = query.value(3).toString();
-                QString node1lat = query.value(4).toString();
-                QString node1lon = query.value(5).toString();
-                QString node1ht = query.value(6).toString();
-                QString node2lat = query.value(7).toString();
-                QString node2lon = query.value(8).toString();
-                QString node2ht = query.value(9).toString();
+                QString node0lat = QString::number(query.value(1).toDouble());
+                QString node0lon = QString::number(query.value(2).toDouble());
+                QString node0ht = QString::number(query.value(3).toDouble());
+                QString node1lat = QString::number(query.value(4).toDouble());
+                QString node1lon = QString::number(query.value(5).toDouble());
+                QString node1ht = QString::number(query.value(6).toDouble());
+                QString node2lat = QString::number(query.value(7).toDouble());
+                QString node2lon = QString::number(query.value(8).toDouble());
+                QString node2ht = QString::number(query.value(9).toDouble());
                 QString DTGbearing = query.value(10).toString();
                 QString basebisect = query.value(11).toString();
-                QString node0range = query.value(12).toString();
-                QString node0bearing = query.value(13).toString();
-                QString node1range = query.value(14).toString();
-                QString node1bearing = query.value(15).toString();
-                QString node2range = query.value(16).toString();
-                QString node2bearing = query.value(17).toString();
-                QString bistatic01 = query.value(18).toString();
-                QString bistatic02 = query.value(19).toString();
-                QString bistatic12 = query.value(20).toString();
+                QString node0range = QString::number(query.value(12).toDouble());
+                QString node0bearing = QString::number(query.value(13).toDouble());
+                QString node1range = QString::number(query.value(14).toDouble());
+                QString node1bearing = QString::number(query.value(15).toDouble());
+                QString node2range = QString::number(query.value(16).toDouble());
+                QString node2bearing = QString::number(query.value(17).toDouble());
+                QString bistatic01 = QString::number(query.value(18).toDouble());
+                QString bistatic02 = QString::number(query.value(19).toDouble());
+                QString bistatic12 = QString::number(query.value(20).toDouble());
 
                 ui->tableWidget_nodes->setRowCount(ui->tableWidget_nodes->rowCount() + 1);
 
@@ -217,12 +224,12 @@ bool MainWindow::load_target_data(QString querytext)
             while (query.next())
             {
                 QString foreignid = query.value(0).toString();
-                QString tgtloclat = query.value(1).toString();
-                QString tgtloclon = query.value(2).toString();
-                QString tgtlocht = query.value(3).toString();
+                QString tgtloclat = QString::number(query.value(1).toDouble());
+                QString tgtloclon = QString::number(query.value(2).toDouble());
+                QString tgtlocht = QString::number(query.value(3).toDouble());
                 QString tgttype = query.value(4).toString();
-                QString tgtarea = query.value(5).toString();
-                QString tgtspeed = query.value(6).toString();
+                QString tgtarea = QString::number(query.value(5).toDouble());
+                QString tgtspeed = QString::number(query.value(6).toDouble());
 
                 ui->tableWidget_target->setRowCount(ui->tableWidget_target->rowCount() + 1);
 
@@ -327,14 +334,14 @@ bool MainWindow::load_weather_data(QString querytext)
             while (query.next())
             {
                 QString foreignid = query.value(0).toString();
-                QString seastate = query.value(1).toString();
-                QString windspeed = query.value(2).toString();
-                QString winddir = query.value(3).toString();
-                QString waveht = query.value(4).toString();
-                QString wavedir = query.value(5).toString();
-                QString waveper = query.value(6).toString();
-                QString airtemp = query.value(7).toString();
-                QString airpress = query.value(8).toString();
+                QString seastate = QString::number(query.value(1).toDouble());
+                QString windspeed = QString::number(query.value(2).toDouble());
+                QString winddir = QString::number(query.value(3).toDouble());
+                QString waveht = QString::number(query.value(4).toDouble());
+                QString wavedir = QString::number(query.value(5).toDouble());
+                QString waveper = QString::number(query.value(6).toDouble());
+                QString airtemp = QString::number(query.value(7).toDouble());
+                QString airpress = QString::number(query.value(8).toDouble());
 
                 ui->tableWidget_weather->setRowCount(ui->tableWidget_weather->rowCount() + 1);
 
@@ -368,6 +375,7 @@ bool MainWindow::load_weather_data(QString querytext)
     }
     return true;
 }
+
 
 void MainWindow::on_pushButton_loadFile_clicked()
 {
@@ -430,6 +438,7 @@ void MainWindow::on_pushButton_loadFiles_clicked()
     hasInit = true;
 
 }
+
 
 QString MainWindow::add_trial_data(QString filename)
 {
@@ -856,183 +865,106 @@ void MainWindow::add_weather_data(QString filename, QString fk_id)
 }
 
 
-
-
-
-void MainWindow::on_comboBox_5_currentIndexChanged(const QString &arg1)
-{
-    ui->comboBox_3->clear();
-    ui->comboBox_3->addItems(search_field_options(arg1));
-}
-
-void MainWindow::on_comboBox_23_currentIndexChanged(const QString &arg1)
-{
-    ui->comboBox_24->clear();
-    ui->comboBox_24->addItems(search_field_options(arg1));
-}
-
-void MainWindow::on_comboBox_27_currentIndexChanged(const QString &arg1)
-{
-    ui->comboBox_28->clear();
-    ui->comboBox_28->addItems(search_field_options(arg1));
-}
-
-QStringList MainWindow::search_field_options(QString table)
-{
-    QStringList fieldlist;
-    if (table == "Trial")
-    {
-        fieldlist << "ArchiveName" << "TrialDate" << "StartTime";
-    }
-    else if (table == "Nodes")
-    {
-        fieldlist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
-                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "BaselineBisector" << "Node0Range" << "Node0Bearing"
-                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing";
-    }
-    else if (table == "Target")
-    {
-        fieldlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt";
-    }
-    else if (table == "Pulse")
-    {
-        fieldlist << "Waveform" << "NumOfPRIs" << "SamplesPerPRI" << "DACDelay" << "ADCDelay" << "PolOrder" << "PRI" << "PrePulse" << "LBandWaveformFreq" << "XBandWaveformFreq";
-    }
-    else if (table == "Weather")
-    {
-        fieldlist << "DouglasSeaState" << "WindSpeed" << "WindDir" << "WaveHeight" << "WaveDir" << "WavePeriod" << "AirTemperature" << "AirPressure";
-    }
-    return fieldlist;
-}
-
-
-
-
 void MainWindow::on_pushButton_newSearchRow_clicked()
 {
-    QDynamicButton *button = new QDynamicButton(this);
-    button->setText("Button" + QString::number(button->getID()));
+    if (firstSearch == true) {
+        QAndOrBar *andorbar = new QAndOrBar();
+        ui->verticalLayout_3->addWidget(andorbar);
+    }
+    firstSearch = true;
 
-    QDynamicLineEdit *lineedit = new QDynamicLineEdit(this);
-    lineedit->setText(QString::number(lineedit->getID()));
+    QSearchBar *searchbar = new QSearchBar();
+    ui->verticalLayout_3->addWidget(searchbar);
 
-    ui->verticalLayout_3->addWidget(button);
-    ui->verticalLayout_3->addWidget(lineedit);
-
-    connect(button, SIGNAL(clicked()), this, SLOT(slotGetButtonNumber()));
-
-
-
-
-//    QCheckBox* check1 = new QCheckBox();
-//    QComboBox* box1 = new QComboBox();
-//    QStringList tableChoice;
-//    tableChoice << "Choose a table" << "Trial" << "Nodes" << "Target" << "Pulse" << "Weather";
-//    box1->addItems(tableChoice);
-//    QComboBox* box2 = new QComboBox();
-//    box2->addItem("Choose a field");
-//    QComboBox* box3 = new QComboBox();
-//    QStringList equators;
-//    equators << "=" << "<>" << ">" << "<" << ">=" << "<=";
-//    box3->addItems(equators);
-//    QLineEdit* line1 = new QLineEdit();
-//    QPushButton* button1 = new QPushButton("Delete");
-
-//    QHBoxLayout *layout = new QHBoxLayout;
-//    layout->addWidget(check1);
-//    layout->addWidget(box1);
-//    layout->addWidget(box2);
-//    layout->addWidget(box3);
-//    layout->addWidget(line1);
-//    layout->addWidget(button1);
-//    ui->verticalLayout_2->addLayout(layout, 0);
+    connect(searchbar->button, SIGNAL(clicked()), this, SLOT(slotDeleteRow()));
+    connect(searchbar->combobox1, SIGNAL(currentTextChanged(QString)), this, SLOT(slotIndexChange(QString)));
 }
 
 void MainWindow::on_pushButton_search_clicked()
 {
+    QStringList tables, fields, equators, values, joiners;
+    for (int i = 0; i < ui->verticalLayout_3->count(); i++)
+    {
+        if (i%2 == 0)
+        {
+            QSearchBar *searchbar = qobject_cast<QSearchBar*>(ui->verticalLayout_3->itemAt(i)->widget());
+            tables << searchbar->combobox1->currentText();
+            fields << searchbar->combobox2->currentText();
+            equators << searchbar->combobox3->currentText();
+            values << searchbar->lineedit->text();
+        }
+        else if (i%2 == 1)
+        {
+            QAndOrBar *andorbar = qobject_cast<QAndOrBar*>(ui->verticalLayout_3->itemAt(i)->widget());
+            joiners << andorbar->combobox->currentText();
+        }
+    }
+    joiners << "AND";
     QString querytext;
+    querytext = "SELECT * FROM " + tables.at(0) + " WHERE ";
 
-    tableChoice0 = ui->comboBox_5->currentText();
-    fieldChoice0 = ui->comboBox_3->currentText();
-    valueChoice0 = ui->lineEdit_10->text();
-    equatorChoice0 = ui->comboBox_2->currentText();
-
-    andor0 = ui->comboBox_31->currentText();
-
-    tableChoice1 = ui->comboBox_23->currentText();
-    fieldChoice1 = ui->comboBox_24->currentText();
-    valueChoice1 = ui->lineEdit_20->text();
-    equatorChoice1 = ui->comboBox_29->currentText();
-
-    andor1 = ui->comboBox_32->currentText();
-
-    tableChoice2 = ui->comboBox_27->currentText();
-    fieldChoice2 = ui->comboBox_28->currentText();
-    valueChoice2 = ui->lineEdit_22->text();
-    equatorChoice2 = ui->comboBox_30->currentText();
-
-    if (ui->checkBox->isChecked())
+    for (int i = 0; i < tables.length(); i++)
     {
-        if (ui->checkBox_2->isChecked())
-        {
-            if (ui->checkBox_3->isChecked())
-            {
-                querytext = "SELECT * FROM " + tableChoice0 + " WHERE (" + fieldChoice0 + equatorChoice0 + "'" + valueChoice0 + "')"
-                        + andor0 + "(" + fieldChoice1 + equatorChoice1 + "'" + valueChoice1 + "')" + andor1 + "(" + fieldChoice2 + equatorChoice2 + "'" + valueChoice2 + "');";
-            }
-            else
-            {
-                querytext = "SELECT * FROM " + tableChoice0 + " WHERE (" + fieldChoice0 + equatorChoice0 + "'" + valueChoice0 + "')" + andor0 + "(" + fieldChoice1 + equatorChoice1 + "'" + valueChoice1 + "');";
-            }
-        }
-        else
-        {
-            querytext = "SELECT * FROM " + tableChoice0 + " WHERE (" + fieldChoice0 + equatorChoice0 + "'" + valueChoice0 + "');";
-        }
+        querytext = querytext + "(" + fields.at(i) + equators.at(i) + "'" + values.at(i) + "') " + joiners.at(i);
     }
 
-    if (tableChoice0 == "Trial")
+    querytext.truncate(querytext.lastIndexOf(QChar(')')) + 1);
+
+    if (tables.at(0) == "Trial")
     {
+        hasInit = false;
         load_trial_data(querytext);
+        hasInit = true;
     }
-    else if (tableChoice0 == "Nodes")
+    else if (tables.at(0) == "Nodes")
     {
+        hasInit = false;
         load_node_data(querytext);
+        hasInit = true;
     }
-    else if (tableChoice0 == "Target")
+    else if (tables.at(0) == "Target")
     {
+        hasInit = false;
         load_target_data(querytext);
+        hasInit = true;
     }
-    else if (tableChoice0 == "Pulse")
+    else if (tables.at(0) == "Pulse")
     {
+        hasInit = false;
         load_pulse_data(querytext);
+        hasInit = true;
     }
-    else if (tableChoice0 == "Weather")
+    else if (tables.at(0) == "Weather")
     {
+        hasInit = false;
         load_weather_data(querytext);
+        hasInit = true;
     }
 }
 
 void MainWindow::on_pushButton_clearSearch_clicked()
 {
-    for (int i = 0; i < ui->verticalLayout_3->count(); i++)
+    int total = ui->verticalLayout_3->count();
+    for (int i = 0; i < total; i++)
     {
-        QDynamicButton *button = qobject_cast<QDynamicButton*>(ui->verticalLayout_3->itemAt(i)->widget());
-        QDynamicLineEdit *lineedit = qobject_cast<QDynamicLineEdit*>(ui->verticalLayout_3->itemAt(i+1)->widget());
-        if (button->getID() == ui->lineEdit->text().toInt())
+        if (i%2 == 1)
         {
-            button->hide();
-            delete button;
-            lineedit->hide();
-            delete lineedit;
+            QAndOrBar *andorbar = qobject_cast<QAndOrBar*>(ui->verticalLayout_3->itemAt(total - (i + 1))->widget());
+            delete andorbar;
+        }
+        else if (i%2 == 0)
+        {
+            QSearchBar *searchbar = qobject_cast<QSearchBar*>(ui->verticalLayout_3->itemAt(total - (i + 1))->widget());
+            delete searchbar;
         }
     }
 
+    QSearchBar *searchbar = new QSearchBar();
+    searchbar->resetID();
 
+    QAndOrBar *andorbar = new QAndOrBar();
+    andorbar->resetID();
 
-
-
-    //TO DO - clear and reset all search options
     hasInit = false;
     load_trial_data("SELECT * FROM Trial");
     load_node_data("SELECT * FROM Nodes");
@@ -1040,6 +972,7 @@ void MainWindow::on_pushButton_clearSearch_clicked()
     load_pulse_data("SELECT * FROM Pulse");
     load_weather_data("SELECT * FROM Weather");
     hasInit = true;
+    firstSearch = false;
 }
 
 void MainWindow::slotGetButtonNumber()
@@ -1048,13 +981,55 @@ void MainWindow::slotGetButtonNumber()
     ui->lineEdit->setText(QString::number(button->getID()));
 }
 
-void MainWindow::slotGetLineEditNumber()
+void MainWindow::slotDeleteRow()
 {
-    QDynamicLineEdit *lineedit = (QDynamicLineEdit*) sender();
-    ui->lineEdit_10->setText(QString::number(lineedit->getID()));
+    QDynamicButton *button = (QDynamicButton*) sender();
+    int buttonNo = button->getID();
+
+    for (int i = 0; i < ui->verticalLayout_3->count(); i++)
+    {
+        QSearchBar *searchbar = qobject_cast<QSearchBar*>(ui->verticalLayout_3->itemAt(i)->widget());
+        if (searchbar->getID() == buttonNo)
+        {
+            delete searchbar;
+        }
+    }
 }
 
+void MainWindow::slotIndexChange(QString text)
+{
+    QDynamicComboBox *combobox = (QDynamicComboBox*) sender();
+    int comboboxNo = combobox->getID();
+    int rowNo = comboboxNo/2;
+    QSearchBar *searchbar = qobject_cast<QSearchBar*>(ui->verticalLayout_3->itemAt(rowNo)->widget());
 
+    QStringList fieldlist;
+    if (text == "Trial")
+    {
+        fieldlist << "ArchiveName" << "TrialDate" << "StartTime";
+    }
+    else if (text == "Nodes")
+    {
+        fieldlist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
+                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "BaselineBisector" << "Node0Range" << "Node0Bearing"
+                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing";
+    }
+    else if (text == "Target")
+    {
+        fieldlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt";
+    }
+    else if (text == "Pulse")
+    {
+        fieldlist << "Waveform" << "NumOfPRIs" << "SamplesPerPRI" << "DACDelay" << "ADCDelay" << "PolOrder" << "PRI" << "PrePulse" << "LBandWaveformFreq" << "XBandWaveformFreq";
+    }
+    else if (text == "Weather")
+    {
+        fieldlist << "DouglasSeaState" << "WindSpeed" << "WindDir" << "WaveHeight" << "WaveDir" << "WavePeriod" << "AirTemperature" << "AirPressure";
+    }
+
+    searchbar->combobox2->clear();
+    searchbar->combobox2->addItems(fieldlist);
+}
 
 
 void MainWindow::on_tableWidget_trial_doubleClicked(const QModelIndex &index)
@@ -1081,6 +1056,7 @@ void MainWindow::on_tableWidget_weather_doubleClicked(const QModelIndex &index)
 {
     ui->tableWidget_weather->resizeColumnsToContents();
 }
+
 
 void MainWindow::on_tableWidget_trial_itemChanged(QTableWidgetItem *item)
 {

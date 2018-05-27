@@ -11,6 +11,7 @@ public:
     ~QDynamicButton();
     static int ResID;
     int getID();
+    void resetID();
 
 public slots:
 

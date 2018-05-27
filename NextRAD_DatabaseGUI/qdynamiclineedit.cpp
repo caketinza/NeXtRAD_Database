@@ -16,4 +16,9 @@ int QDynamicLineEdit::getID()
     return lineeditID;
 }
 
+void QDynamicLineEdit::resetID()
+{
+    ResID = 0;
+}
+
 int QDynamicLineEdit::ResID = 0;
