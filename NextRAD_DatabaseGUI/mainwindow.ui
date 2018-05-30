@@ -21,7 +21,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_trial">
        <attribute name="title">
@@ -141,11 +141,6 @@
           <column>
            <property name="text">
             <string>DTGofBearing</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>BaselineBisector</string>
            </property>
           </column>
           <column>

@@ -121,7 +121,6 @@ bool MainWindow::load_trial_data(QString querytext)
 
 bool MainWindow::load_node_data(QString querytext)
 {
-    //still need to add bistatic angles when added to mysql
     ui->tableWidget_nodes->setRowCount(0);
     QHeaderView* header =  ui->tableWidget_nodes->horizontalHeader();
 
@@ -143,16 +142,15 @@ bool MainWindow::load_node_data(QString querytext)
                 QString node2lon = QString::number(query.value(8).toDouble());
                 QString node2ht = QString::number(query.value(9).toDouble());
                 QString DTGbearing = query.value(10).toString();
-                QString basebisect = query.value(11).toString();
-                QString node0range = QString::number(query.value(12).toDouble());
-                QString node0bearing = QString::number(query.value(13).toDouble());
-                QString node1range = QString::number(query.value(14).toDouble());
-                QString node1bearing = QString::number(query.value(15).toDouble());
-                QString node2range = QString::number(query.value(16).toDouble());
-                QString node2bearing = QString::number(query.value(17).toDouble());
-                QString bistatic01 = QString::number(query.value(18).toDouble());
-                QString bistatic02 = QString::number(query.value(19).toDouble());
-                QString bistatic12 = QString::number(query.value(20).toDouble());
+                QString node0range = QString::number(query.value(11).toDouble());
+                QString node0bearing = QString::number(query.value(12).toDouble());
+                QString node1range = QString::number(query.value(13).toDouble());
+                QString node1bearing = QString::number(query.value(14).toDouble());
+                QString node2range = QString::number(query.value(15).toDouble());
+                QString node2bearing = QString::number(query.value(16).toDouble());
+                QString bistatic01 = QString::number(query.value(17).toDouble());
+                QString bistatic02 = QString::number(query.value(18).toDouble());
+                QString bistatic12 = QString::number(query.value(19).toDouble());
 
                 ui->tableWidget_nodes->setRowCount(ui->tableWidget_nodes->rowCount() + 1);
 
@@ -167,7 +165,6 @@ bool MainWindow::load_node_data(QString querytext)
                 QTableWidgetItem* node2lonItem = new QTableWidgetItem(node2lon);
                 QTableWidgetItem* node2htItem = new QTableWidgetItem(node2ht);
                 QTableWidgetItem* DTGbearingItem = new QTableWidgetItem(DTGbearing);
-                QTableWidgetItem* basebisectItem = new QTableWidgetItem(basebisect);
                 QTableWidgetItem* node0rangeItem = new QTableWidgetItem(node0range);
                 QTableWidgetItem* node0bearingItem = new QTableWidgetItem(node0bearing);
                 QTableWidgetItem* node1rangeItem = new QTableWidgetItem(node1range);
@@ -189,16 +186,15 @@ bool MainWindow::load_node_data(QString querytext)
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 8, node2lonItem);
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 9, node2htItem);
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 10, DTGbearingItem);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 11, basebisectItem);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 12, node0rangeItem);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 13, node0bearingItem);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 14, node1rangeItem);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 15, node1bearingItem);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 16, node2rangeItem);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 17, node2bearingItem);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 18, bistatic01Item);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 19, bistatic02Item);
-                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 20, bistatic12Item);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 11, node0rangeItem);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 12, node0bearingItem);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 13, node1rangeItem);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 14, node1bearingItem);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 15, node2rangeItem);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 16, node2bearingItem);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 17, bistatic01Item);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 18, bistatic02Item);
+                ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 19, bistatic12Item);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
@@ -565,7 +561,6 @@ void MainWindow::add_node_data(QString filename, QString fk_id)
     }
 
     QString dtg = bearValues.at(bearKeys.indexOf("DTG", 0));
-    QString basebi = bearValues.at(bearKeys.indexOf("BASELINE_BISECTOR", 0));
     QString node0rng = bearValues.at(bearKeys.indexOf("NODE0_RANGE", 0));
     QString node0bear = bearValues.at(bearKeys.indexOf("NODE0_BEARING", 0));
     QString node1rng = bearValues.at(bearKeys.indexOf("NODE1_RANGE", 0));
@@ -614,10 +609,9 @@ void MainWindow::add_node_data(QString filename, QString fk_id)
                 if (query.exec("UPDATE Nodes SET Node0LocationLat = '" + node0lat + "', Node0LocationLon = '" + node0lon + "', Node0LocationHt = '" + node0ht
                                + "', Node1LocationLat = '" + node1lat + "', Node1LocationLon = '" + node1lon + "', Node1LocationHt = '" + node1ht
                                + "', Node2LocationLat = '" + node2lat + "', Node2LocationLon = '" + node2lon + "', Node2LocationHt = '" + node2ht
-                               + "', DTGOfBearing = '" + dtg + "', BaselineBisector = '" + basebi + "', Node0Range = '" + node0rng + "', Node0Bearing = '" + node0bear
-                               + "', Node1Range = '" + node1rng + "', Node1Bearing = '" + node1bear + "', Node2Range = '" + node2rng + "', Node2Bearing = '" + node2bear
-                               + "', BistaticAngle0_1 = '" + bistatic0_1 + "', BistaticAngle0_2 = '" + bistatic0_2 + "', BistaticAngle1_2 = '" + bistatic1_2
-                               + "' WHERE fk_id = '" + fk_id + "';"))
+                               + "', DTGOfBearing = '" + dtg + "', Node0Range = '" + node0rng + "', Node0Bearing = '" + node0bear + "', Node1Range = '" + node1rng
+                               + "', Node1Bearing = '" + node1bear + "', Node2Range = '" + node2rng + "', Node2Bearing = '" + node2bear + "', BistaticAngle0_1 = '"
+                               + bistatic0_1 + "', BistaticAngle0_2 = '" + bistatic0_2 + "', BistaticAngle1_2 = '" + bistatic1_2 + "' WHERE fk_id = '" + fk_id + "';"))
                 {
                     QMessageBox::information(this, "Update Success", "Node data updated.");
                 }
@@ -631,10 +625,10 @@ void MainWindow::add_node_data(QString filename, QString fk_id)
         else
         {
             if (query.exec("INSERT INTO Nodes (fk_id, Node0LocationLat, Node0LocationLon, Node0LocationHt, Node1LocationLat, Node1LocationLon, Node1LocationHt, "
-                           "Node2LocationLat, Node2LocationLon, Node2LocationHt, DTGOfBearing, BaselineBisector, Node0Range, Node0Bearing, Node1Range, Node1Bearing, "
+                           "Node2LocationLat, Node2LocationLon, Node2LocationHt, DTGOfBearing, Node0Range, Node0Bearing, Node1Range, Node1Bearing, "
                            "Node2Range, Node2Bearing, BistaticAngle0_1, BistaticAngle0_2, BistaticAngle1_2) VALUES ('" + fk_id + "','" + node0lat + "','" + node0lon
                            + "','" + node0ht + "','" + node1lat + "','" + node1lon + "','" + node1ht + "','" + node2lat + "','" + node2lon + "','" + node2ht + "','"
-                           + dtg + "','" + basebi + "','" + node0rng + "','" + node0bear + "','" + node1rng + "','" + node1bear + "','" + node2rng + "','" + node2bear
+                           + dtg + "','" + node0rng + "','" + node0bear + "','" + node1rng + "','" + node1bear + "','" + node2rng + "','" + node2bear
                            + "','" + bistatic0_1 + "','" + bistatic0_2 + "','" + bistatic1_2 + "')"))
             {
                 QMessageBox::information(this, "Update Success", "Node data added to database.");
@@ -1006,17 +1000,17 @@ void MainWindow::slotIndexChange(QString text)
     QStringList fieldlist;
     if (text == "Trial")
     {
-        fieldlist << "ArchiveName" << "TrialDate" << "StartTime";
+        fieldlist << "ArchiveName" << "TrialDate" << "StartTime" << "TrialLocation" << "Comments" << "Interference";
     }
     else if (text == "Nodes")
     {
         fieldlist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
-                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "BaselineBisector" << "Node0Range" << "Node0Bearing"
-                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing";
+                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "Node0Range" << "Node0Bearing"
+                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing" << "BistaticAngle0_1" << "BistaticAngle0_2" << "BistaticAngle1_2";
     }
     else if (text == "Target")
     {
-        fieldlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt";
+        fieldlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt" << "TgtType" << "TgtAre" << "TgtSpeed";
     }
     else if (text == "Pulse")
     {
