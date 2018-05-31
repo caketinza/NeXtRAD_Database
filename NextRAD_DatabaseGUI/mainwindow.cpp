@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tabWidget->setCurrentIndex(0);
     hasInit = true;
-//    ui->pushButton_newSearchRow->setDisabled(true);
+    on_pushButton_newSearchRow_clicked();
 }
 
 MainWindow::~MainWindow()
@@ -380,7 +380,20 @@ void MainWindow::on_pushButton_loadFile_clicked()
     QString filename = QFileDialog::getOpenFileName(this, tr("Choose File"), "/home/caitlin", tr("Header Files(*.ini)"));
     ui->lineEdit->setText(filename);
 
-    QString fk_id = add_trial_data(filename);
+    QStringList temp  = filename.split('/');
+    QString newfolderpath;
+    for (int i = 0; i < temp.length() - 3; i++)
+    {
+        newfolderpath = newfolderpath + temp.at(i) + "/";
+    }
+    newfolderpath = newfolderpath + "Data_Sorted";
+    QDir dir(newfolderpath);
+    if (!dir.exists())
+    {
+        QDir().mkpath(newfolderpath);
+    }
+
+    QString fk_id = add_trial_data(filename, newfolderpath);
     add_node_data(filename, fk_id);
     add_target_data(filename, fk_id);
     add_pulse_data(filename, fk_id);
@@ -394,6 +407,7 @@ void MainWindow::on_pushButton_loadFile_clicked()
 
     ui->lineEdit->clear();
     hasInit = true;
+    ui->pushButton_loadFile->clearFocus();
 }
 
 void MainWindow::on_pushButton_loadFiles_clicked()
@@ -402,6 +416,13 @@ void MainWindow::on_pushButton_loadFiles_clicked()
     //choose directory
     QString folderpath = QFileDialog::getExistingDirectory(0, ("Choose Folder"), "/home/caitlin");
     ui->lineEdit->setText(folderpath);
+
+    QString newfolderpath = folderpath + "_Sorted";
+    QDir dirtemp(newfolderpath);
+    if (!dirtemp.exists())
+    {
+        QDir().mkpath(newfolderpath);
+    }
 
     QDir dir(folderpath);
 
@@ -416,7 +437,7 @@ void MainWindow::on_pushButton_loadFiles_clicked()
     {
         QString filename = qdir.next();
 
-        QString fk_id = add_trial_data(filename);
+        QString fk_id = add_trial_data(filename, newfolderpath);
         add_node_data(filename, fk_id);
         add_target_data(filename, fk_id);
         add_pulse_data(filename, fk_id);
@@ -432,11 +453,52 @@ void MainWindow::on_pushButton_loadFiles_clicked()
 
     ui->lineEdit->clear();
     hasInit = true;
+}
 
+void MainWindow::organise_files(QString archivename, QString filename, QString newfolderpath)
+{
+    QString archive = newfolderpath + "/" + archivename;
+    QDir archivedir(archive);
+    if (!archivedir.exists())
+    {
+        QDir().mkpath(archive);
+    }
+
+    QStringList temp = filename.split('/');
+
+    QString oldpath;
+    for (int i = 0;  i < (temp.length() - 3); i++)
+    {
+        oldpath = oldpath + temp.at(i) + "/";
+    }
+
+    QString oldfolder = temp.at(temp.length() - 2);
+    QString newfolder = archivename + oldfolder.right(3);
+
+    QDir origindir(filename.left(filename.lastIndexOf('/')));
+    if (origindir.exists())
+    {
+        QDir destdir(archive + "/" + newfolder);
+        if (!destdir.exists())
+        {
+            QDir().mkpath(archive + "/" + newfolder);
+            foreach (QString fileName, origindir.entryList(QDir::Files))
+            {
+                if (fileName.right(3) == "ini")
+                {
+                    QFile::copy(filename.left(filename.lastIndexOf('/')) + "/" + fileName, archive + "/" + fileName);
+                }
+                else
+                {
+                    QFile::copy(filename.left(filename.lastIndexOf('/')) + "/" + fileName, archive + "/" + newfolder + "/" + fileName);
+                }
+            }
+        }
+    }
 }
 
 
-QString MainWindow::add_trial_data(QString filename)
+QString MainWindow::add_trial_data(QString filename, QString newfolderpath)
 {
     //load a file into the database
     QSettings settings(filename, QSettings::IniFormat);
@@ -460,7 +522,7 @@ QString MainWindow::add_trial_data(QString filename)
     QString min = timValues.at(timKeys.indexOf("MINUTE", 0));
     QString sec = timValues.at(timKeys.indexOf("SECOND", 0));
 
-    QString archivename = year + "-" + month + "-" + day + "_" + hour + ":" + min + ":" + sec;
+    QString archivename = year + "_" + month + "_" + day + "_" + hour + "_" + min + "_" + sec;
     QString trialdate = year + "-" + month + "-" + day;
     QString starttime = hour + ":" + min + ":" + sec;
 
@@ -506,6 +568,9 @@ QString MainWindow::add_trial_data(QString filename)
     {
         qDebug() << query.lastError().text();
     }
+
+    organise_files(archivename, filename, newfolderpath);
+
     return fk_id;
 }
 
@@ -967,6 +1032,7 @@ void MainWindow::on_pushButton_clearSearch_clicked()
     load_weather_data("SELECT * FROM Weather");
     hasInit = true;
     firstSearch = false;
+    on_pushButton_newSearchRow_clicked();
 }
 
 void MainWindow::slotGetButtonNumber()
@@ -979,13 +1045,37 @@ void MainWindow::slotDeleteRow()
 {
     QDynamicButton *button = (QDynamicButton*) sender();
     int buttonNo = button->getID();
+    int searchNo, andorNo;
 
-    for (int i = 0; i < ui->verticalLayout_3->count(); i++)
+    if (buttonNo == 1)
     {
-        QSearchBar *searchbar = qobject_cast<QSearchBar*>(ui->verticalLayout_3->itemAt(i)->widget());
-        if (searchbar->getID() == buttonNo)
+        searchNo = 1;
+        andorNo = 1;
+    }
+    else
+    {
+        searchNo = buttonNo;
+        andorNo = buttonNo - 1;
+    }
+
+    int total = ui->verticalLayout_3->count();
+    for (int i = 0; i < total; i++)
+    {
+        if (i%2 == 0)
         {
-            delete searchbar;
+            QSearchBar *searchbar = qobject_cast<QSearchBar*>(ui->verticalLayout_3->itemAt(total - (i+1))->widget());
+            if (searchbar->getID() == searchNo)
+            {
+                delete searchbar;
+            }
+        }
+        else if (i%2 == 1)
+        {
+            QAndOrBar *andorbar = qobject_cast<QAndOrBar*>(ui->verticalLayout_3->itemAt(total - (i+1))->widget());
+            if (andorbar->getID() == andorNo)
+            {
+                delete andorbar;
+            }
         }
     }
 }
@@ -994,59 +1084,76 @@ void MainWindow::slotIndexChange(QString text)
 {
     QDynamicComboBox *combobox = (QDynamicComboBox*) sender();
     int comboboxNo = combobox->getID();
-    int rowNo = comboboxNo/2;
-    QSearchBar *searchbar = qobject_cast<QSearchBar*>(ui->verticalLayout_3->itemAt(rowNo)->widget());
+    int rowNo;
+    if (comboboxNo <= 5)
+    {
+        rowNo = comboboxNo/3 + 1;
+    }
+    else
+    {
+        rowNo = comboboxNo/3;
+    }
+    int total = ui->verticalLayout_3->count();
+    for (int i = 0; i < total; i++)
+    {
+        if (i%2 == 0)
+        {
+            QSearchBar *searchbar = qobject_cast<QSearchBar*>(ui->verticalLayout_3->itemAt(i)->widget());
+            if (searchbar->getID() == rowNo)
+            {
+                QStringList fieldlist;
+                if (text == "Trial")
+                {
+                    fieldlist << "ArchiveName" << "TrialDate" << "StartTime" << "TrialLocation" << "Comments" << "Interference";
+                }
+                else if (text == "Nodes")
+                {
+                    fieldlist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
+                             << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "Node0Range" << "Node0Bearing"
+                             << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing" << "BistaticAngle0_1" << "BistaticAngle0_2" << "BistaticAngle1_2";
+                }
+                else if (text == "Target")
+                {
+                    fieldlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt" << "TgtType" << "TgtAre" << "TgtSpeed";
+                }
+                else if (text == "Pulse")
+                {
+                    fieldlist << "Waveform" << "NumOfPRIs" << "SamplesPerPRI" << "DACDelay" << "ADCDelay" << "PolOrder" << "PRI" << "PrePulse" << "LBandWaveformFreq" << "XBandWaveformFreq";
+                }
+                else if (text == "Weather")
+                {
+                    fieldlist << "DouglasSeaState" << "WindSpeed" << "WindDir" << "WaveHeight" << "WaveDir" << "WavePeriod" << "AirTemperature" << "AirPressure";
+                }
 
-    QStringList fieldlist;
-    if (text == "Trial")
-    {
-        fieldlist << "ArchiveName" << "TrialDate" << "StartTime" << "TrialLocation" << "Comments" << "Interference";
+                searchbar->combobox2->clear();
+                searchbar->combobox2->addItems(fieldlist);
+            }
+        }
     }
-    else if (text == "Nodes")
-    {
-        fieldlist << "Node0LocationLat" << "Node0LocationLon" << "Node0LocationHt" << "Node1LocationLat" << "Node1LocationLon" << "Node1LocationHt"
-                 << "Node2LocationLat" << "Node2LocationLon" << "Node2LocationHt" << "DTGOfBearing" << "Node0Range" << "Node0Bearing"
-                 << "Node1Range" << "Node1Bearing" << "Node2Range" << "Node2Bearing" << "BistaticAngle0_1" << "BistaticAngle0_2" << "BistaticAngle1_2";
-    }
-    else if (text == "Target")
-    {
-        fieldlist << "TargetLocationLat" << "TargetLocationLon" << "TargetLocationHt" << "TgtType" << "TgtAre" << "TgtSpeed";
-    }
-    else if (text == "Pulse")
-    {
-        fieldlist << "Waveform" << "NumOfPRIs" << "SamplesPerPRI" << "DACDelay" << "ADCDelay" << "PolOrder" << "PRI" << "PrePulse" << "LBandWaveformFreq" << "XBandWaveformFreq";
-    }
-    else if (text == "Weather")
-    {
-        fieldlist << "DouglasSeaState" << "WindSpeed" << "WindDir" << "WaveHeight" << "WaveDir" << "WavePeriod" << "AirTemperature" << "AirPressure";
-    }
-
-    searchbar->combobox2->clear();
-    searchbar->combobox2->addItems(fieldlist);
 }
 
 
-void MainWindow::on_tableWidget_trial_doubleClicked(const QModelIndex &index)
+void MainWindow::on_tableWidget_trial_doubleClicked()
 {
     ui->tableWidget_trial->resizeColumnsToContents();
 }
 
-void MainWindow::on_tableWidget_nodes_doubleClicked(const QModelIndex &index)
+void MainWindow::on_tableWidget_nodes_doubleClicked()
 {
     ui->tableWidget_nodes->resizeColumnsToContents();
 }
 
-void MainWindow::on_tableWidget_target_doubleClicked(const QModelIndex &index)
+void MainWindow::on_tableWidget_target_doubleClicked()
 {
     ui->tableWidget_target->resizeColumnsToContents();
 }
 
-void MainWindow::on_tableWidget_pulse_doubleClicked(const QModelIndex &index)
+void MainWindow::on_tableWidget_pulse_doubleClicked()
 {
     ui->tableWidget_pulse->resizeColumnsToContents();
 }
 
-void MainWindow::on_tableWidget_weather_doubleClicked(const QModelIndex &index)
+void MainWindow::on_tableWidget_weather_doubleClicked()
 {
     ui->tableWidget_weather->resizeColumnsToContents();
 }

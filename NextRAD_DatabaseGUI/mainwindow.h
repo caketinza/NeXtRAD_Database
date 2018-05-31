@@ -37,7 +37,15 @@ private slots:
 
     bool load_weather_data(QString querytext);
 
-    QString add_trial_data(QString filename);
+
+    void on_pushButton_loadFiles_clicked();
+
+    void on_pushButton_loadFile_clicked();
+
+    void organise_files(QString archivename, QString filename, QString newfolderpath);
+
+
+    QString add_trial_data(QString filename, QString newfolderpath);
 
     void add_node_data(QString filename, QString fk_id);
 
@@ -47,9 +55,12 @@ private slots:
 
     void add_weather_data(QString filename, QString fk_id);
 
-    void on_pushButton_loadFiles_clicked();
 
-    void on_pushButton_loadFile_clicked();
+    void on_pushButton_search_clicked();
+
+    void on_pushButton_newSearchRow_clicked();
+
+    void on_pushButton_clearSearch_clicked();
 
     void slotGetButtonNumber();
 
@@ -58,22 +69,15 @@ private slots:
     void slotIndexChange(QString text);
 
 
-    void on_pushButton_search_clicked();
+    void on_tableWidget_trial_doubleClicked();
 
-    void on_pushButton_newSearchRow_clicked();
+    void on_tableWidget_nodes_doubleClicked();
 
-    void on_pushButton_clearSearch_clicked();
+    void on_tableWidget_target_doubleClicked();
 
+    void on_tableWidget_pulse_doubleClicked();
 
-    void on_tableWidget_trial_doubleClicked(const QModelIndex &index);
-
-    void on_tableWidget_nodes_doubleClicked(const QModelIndex &index);
-
-    void on_tableWidget_target_doubleClicked(const QModelIndex &index);
-
-    void on_tableWidget_pulse_doubleClicked(const QModelIndex &index);
-
-    void on_tableWidget_weather_doubleClicked(const QModelIndex &index);
+    void on_tableWidget_weather_doubleClicked();
 
     void on_tableWidget_trial_itemChanged(QTableWidgetItem *item);
 
@@ -90,11 +94,6 @@ private:
     bool hasInit;
     bool firstSearch = false;
 
-    QString valueChoice0, valueChoice1, valueChoice2, valueChoice3, valueChoice4;
-    QString fieldChoice0, fieldChoice1, fieldChoice2, fieldChoice3, fieldChoice4;
-    QString tableChoice0, tableChoice1, tableChoice2, tableChoice3, tableChoice4;
-    QString equatorChoice0, equatorChoice1, equatorChoice2, equatorChoice3, equatorChoice4;
-    QString andor0, andor1;
     QSqlDatabase db;
 };
 

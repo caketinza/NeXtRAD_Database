@@ -19,10 +19,10 @@ QSearchBar::QSearchBar(QWidget *parent) : QWidget(), layout(new QHBoxLayout(this
     combobox3->addItems(equators);
 
     lineedit = new QDynamicLineEdit();
-    lineedit->setText(QString::number(lineedit->getID()));
+    lineedit->setText(QString::number(searchID));
 
     button = new QDynamicButton();
-    button->setText("Delete");
+    button->setText("Remove");
 
     layout->addWidget(combobox1);
     layout->addWidget(combobox2);
