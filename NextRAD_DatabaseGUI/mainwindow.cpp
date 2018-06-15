@@ -36,10 +36,16 @@ MainWindow::MainWindow(QWidget *parent) :
     db.setHostName("localhost");
     db.setDatabaseName("nextrad");
     db.setUserName("root");
+//    db.setPassword("bubsy3726");
     db.setPassword(text);
 
     if (db.open())
     {
+        ui->tableWidget_trial->setRowCount(0);
+        ui->tableWidget_nodes->setRowCount(0);
+        ui->tableWidget_target->setRowCount(0);
+        ui->tableWidget_pulse->setRowCount(0);
+        ui->tableWidget_weather->setRowCount(0);
         load_trial_data("SELECT * FROM Trial");
         load_node_data("SELECT * FROM Nodes");
         load_target_data("SELECT * FROM Target");
@@ -71,10 +77,11 @@ MainWindow::~MainWindow()
 }
 
 
-bool MainWindow::load_trial_data(QString querytext)
+QStringList MainWindow::load_trial_data(QString querytext)
 {
-    ui->tableWidget_trial->setRowCount(0);
+//    ui->tableWidget_trial->setRowCount(0);
     QHeaderView* header =  ui->tableWidget_trial->horizontalHeader();
+    QStringList ids;
     if (db.open())
     {
         QSqlQuery query;
@@ -107,21 +114,24 @@ bool MainWindow::load_trial_data(QString querytext)
                 ui->tableWidget_trial->setItem(ui->tableWidget_trial->rowCount() - 1, 4, triallocItem);
                 ui->tableWidget_trial->setItem(ui->tableWidget_trial->rowCount() - 1, 5, commentsItem);
                 ui->tableWidget_trial->setItem(ui->tableWidget_trial->rowCount() - 1, 6, interferenceItem);
+
+                ids.append(primaryid);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
         else
         {
             qDebug() << query.lastError().text();
-            return false;
+//            return false;
         }
     }
-    return true;
+    return ids;
 }
 
-bool MainWindow::load_node_data(QString querytext)
+QStringList MainWindow::load_node_data(QString querytext)
 {
-    ui->tableWidget_nodes->setRowCount(0);
+//    ui->tableWidget_nodes->setRowCount(0);
+    QStringList ids;
     QHeaderView* header =  ui->tableWidget_nodes->horizontalHeader();
 
     if (db.open())
@@ -195,21 +205,24 @@ bool MainWindow::load_node_data(QString querytext)
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 17, bistatic01Item);
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 18, bistatic02Item);
                 ui->tableWidget_nodes->setItem(ui->tableWidget_nodes->rowCount() - 1, 19, bistatic12Item);
+
+                ids.append(foreignid);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
         else
         {
             qDebug() << query.lastError().text();
-            return false;
+//            return false;
         }
     }
-    return true;
+    return ids;
 }
 
-bool MainWindow::load_target_data(QString querytext)
+QStringList MainWindow::load_target_data(QString querytext)
 {
-    ui->tableWidget_target->setRowCount(0);
+//    ui->tableWidget_target->setRowCount(0);
+    QStringList ids;
     QHeaderView* header =  ui->tableWidget_target->horizontalHeader();
 
     if (db.open())
@@ -244,21 +257,24 @@ bool MainWindow::load_target_data(QString querytext)
                 ui->tableWidget_target->setItem(ui->tableWidget_target->rowCount() - 1, 4, tgttypeItem);
                 ui->tableWidget_target->setItem(ui->tableWidget_target->rowCount() - 1, 5, tgtareaItem);
                 ui->tableWidget_target->setItem(ui->tableWidget_target->rowCount() - 1, 6, tgtspeedItem);
+
+                ids.append(foreignid);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
         else
         {
             qDebug() << query.lastError().text();
-            return false;
+//            return false;
         }
     }
-    return true;
+    return ids;
 }
 
-bool MainWindow::load_pulse_data(QString querytext)
+QStringList MainWindow::load_pulse_data(QString querytext)
 {
-    ui->tableWidget_pulse->setRowCount(0);
+//    ui->tableWidget_pulse->setRowCount(0);
+    QStringList ids;
     QHeaderView* header =  ui->tableWidget_pulse->horizontalHeader();
 
     if (db.open())
@@ -305,21 +321,24 @@ bool MainWindow::load_pulse_data(QString querytext)
                 ui->tableWidget_pulse->setItem(ui->tableWidget_pulse->rowCount() - 1, 8, prepulseItem);
                 ui->tableWidget_pulse->setItem(ui->tableWidget_pulse->rowCount() - 1, 9, lbandfreqItem);
                 ui->tableWidget_pulse->setItem(ui->tableWidget_pulse->rowCount() - 1, 10, xbandfreqItem);
+
+                ids.append(foreignid);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
         else
         {
             qDebug() << query.lastError().text();
-            return false;
+//            return false;
         }
     }
-    return true;
+    return ids;
 }
 
-bool MainWindow::load_weather_data(QString querytext)
+QStringList MainWindow::load_weather_data(QString querytext)
 {
-    ui->tableWidget_weather->setRowCount(0);
+//    ui->tableWidget_weather->setRowCount(0);
+    QStringList ids;
     QHeaderView* header =  ui->tableWidget_weather->horizontalHeader();
 
     if (db.open())
@@ -360,16 +379,18 @@ bool MainWindow::load_weather_data(QString querytext)
                 ui->tableWidget_weather->setItem(ui->tableWidget_weather->rowCount() - 1, 6, waveperItem);
                 ui->tableWidget_weather->setItem(ui->tableWidget_weather->rowCount() - 1, 7, airtempItem);
                 ui->tableWidget_weather->setItem(ui->tableWidget_weather->rowCount() - 1, 8, airpressItem);
+
+                ids.append(foreignid);
             }
             header->setSectionResizeMode(QHeaderView::Stretch);
         }
         else
         {
             qDebug() << query.lastError().text();
-            return false;
+//            return false;
         }
     }
-    return true;
+    return ids;
 }
 
 
@@ -399,6 +420,11 @@ void MainWindow::on_pushButton_loadFile_clicked()
     add_pulse_data(filename, fk_id);
     add_weather_data(filename, fk_id);
 
+    ui->tableWidget_trial->setRowCount(0);
+    ui->tableWidget_nodes->setRowCount(0);
+    ui->tableWidget_target->setRowCount(0);
+    ui->tableWidget_pulse->setRowCount(0);
+    ui->tableWidget_weather->setRowCount(0);
     load_trial_data("SELECT * FROM Trial");
     load_node_data("SELECT * FROM Nodes");
     load_target_data("SELECT * FROM Target");
@@ -444,7 +470,11 @@ void MainWindow::on_pushButton_loadFiles_clicked()
         add_weather_data(filename, fk_id);
 
     }
-
+    ui->tableWidget_trial->setRowCount(0);
+    ui->tableWidget_nodes->setRowCount(0);
+    ui->tableWidget_target->setRowCount(0);
+    ui->tableWidget_pulse->setRowCount(0);
+    ui->tableWidget_weather->setRowCount(0);
     load_trial_data("SELECT * FROM Trial");
     load_node_data("SELECT * FROM Nodes");
     load_target_data("SELECT * FROM Target");
@@ -968,35 +998,100 @@ void MainWindow::on_pushButton_search_clicked()
     }
 
     querytext.truncate(querytext.lastIndexOf(QChar(')')) + 1);
-
+    QStringList ids;
     if (tables.at(0) == "Trial")
     {
         hasInit = false;
-        load_trial_data(querytext);
+        ui->tableWidget_trial->setRowCount(0);
+        ui->tableWidget_nodes->setRowCount(0);
+        ui->tableWidget_target->setRowCount(0);
+        ui->tableWidget_pulse->setRowCount(0);
+        ui->tableWidget_weather->setRowCount(0);
+        ids = load_trial_data(querytext);
+        for (int i = 0; i < ids.length(); i++)
+        {
+            load_node_data("SELECT * FROM Nodes WHERE fk_id = '" + ids.at(i) + "'");
+            load_target_data("SELECT * FROM Target WHERE fk_id = '" + ids.at(i) + "'");
+            load_pulse_data("SELECT * FROM Pulse WHERE fk_id = '" + ids.at(i) + "'");
+            load_weather_data("SELECT * FROM Weather WHERE fk_id = '" + ids.at(i) + "'");
+        }
+        ui->tabWidget->setCurrentIndex(0);
         hasInit = true;
     }
     else if (tables.at(0) == "Nodes")
     {
         hasInit = false;
-        load_node_data(querytext);
+        ui->tableWidget_trial->setRowCount(0);
+        ui->tableWidget_nodes->setRowCount(0);
+        ui->tableWidget_target->setRowCount(0);
+        ui->tableWidget_pulse->setRowCount(0);
+        ui->tableWidget_weather->setRowCount(0);
+        ids = load_node_data(querytext);
+        for (int i = 0; i < ids.length(); i++)
+        {
+            load_trial_data("SELECT * FROM Trial WHERE pk_id = '" + ids.at(i) + "'");
+            load_target_data("SELECT * FROM Target WHERE fk_id = '" + ids.at(i) + "'");
+            load_pulse_data("SELECT * FROM Pulse WHERE fk_id = '" + ids.at(i) + "'");
+            load_weather_data("SELECT * FROM Weather WHERE fk_id = '" + ids.at(i) + "'");
+        }
+        ui->tabWidget->setCurrentIndex(1);
         hasInit = true;
     }
     else if (tables.at(0) == "Target")
     {
         hasInit = false;
-        load_target_data(querytext);
+        ui->tableWidget_trial->setRowCount(0);
+        ui->tableWidget_nodes->setRowCount(0);
+        ui->tableWidget_target->setRowCount(0);
+        ui->tableWidget_pulse->setRowCount(0);
+        ui->tableWidget_weather->setRowCount(0);
+        ids = load_target_data(querytext);
+        for (int i = 0; i < ids.length(); i++)
+        {
+            load_trial_data("SELECT * FROM Trial WHERE pk_id = '" + ids.at(i) + "'");
+            load_node_data("SELECT * FROM Nodes WHERE fk_id = '" + ids.at(i) + "'");
+            load_pulse_data("SELECT * FROM Pulse WHERE fk_id = '" + ids.at(i) + "'");
+            load_weather_data("SELECT * FROM Weather WHERE fk_id = '" + ids.at(i) + "'");
+        }
+        ui->tabWidget->setCurrentIndex(2);
         hasInit = true;
     }
     else if (tables.at(0) == "Pulse")
     {
         hasInit = false;
-        load_pulse_data(querytext);
+        ui->tableWidget_trial->setRowCount(0);
+        ui->tableWidget_nodes->setRowCount(0);
+        ui->tableWidget_target->setRowCount(0);
+        ui->tableWidget_pulse->setRowCount(0);
+        ui->tableWidget_weather->setRowCount(0);
+        ids = load_pulse_data(querytext);
+        for (int i = 0; i < ids.length(); i++)
+        {
+            load_trial_data("SELECT * FROM Trial WHERE pk_id = '" + ids.at(i) + "'");
+            load_node_data("SELECT * FROM Nodes WHERE fk_id = '" + ids.at(i) + "'");
+            load_target_data("SELECT * FROM Target WHERE fk_id = '" + ids.at(i) + "'");
+            load_weather_data("SELECT * FROM Weather WHERE fk_id = '" + ids.at(i) + "'");
+        }
+        ui->tabWidget->setCurrentIndex(3);
         hasInit = true;
     }
     else if (tables.at(0) == "Weather")
     {
         hasInit = false;
-        load_weather_data(querytext);
+        ui->tableWidget_trial->setRowCount(0);
+        ui->tableWidget_nodes->setRowCount(0);
+        ui->tableWidget_target->setRowCount(0);
+        ui->tableWidget_pulse->setRowCount(0);
+        ui->tableWidget_weather->setRowCount(0);
+        ids = load_weather_data(querytext);
+        for (int i = 0; i < ids.length(); i++)
+        {
+            load_trial_data("SELECT * FROM Trial WHERE pk_id = '" + ids.at(i) + "'");
+            load_node_data("SELECT * FROM Nodes WHERE fk_id = '" + ids.at(i) + "'");
+            load_target_data("SELECT * FROM Target WHERE fk_id = '" + ids.at(i) + "'");
+            load_pulse_data("SELECT * FROM Pulse WHERE fk_id = '" + ids.at(i) + "'");
+        }
+        ui->tabWidget->setCurrentIndex(4);
         hasInit = true;
     }
 }
@@ -1025,12 +1120,18 @@ void MainWindow::on_pushButton_clearSearch_clicked()
     andorbar->resetID();
 
     hasInit = false;
+    ui->tableWidget_trial->setRowCount(0);
+    ui->tableWidget_nodes->setRowCount(0);
+    ui->tableWidget_target->setRowCount(0);
+    ui->tableWidget_pulse->setRowCount(0);
+    ui->tableWidget_weather->setRowCount(0);
     load_trial_data("SELECT * FROM Trial");
     load_node_data("SELECT * FROM Nodes");
     load_target_data("SELECT * FROM Target");
     load_pulse_data("SELECT * FROM Pulse");
     load_weather_data("SELECT * FROM Weather");
     hasInit = true;
+    ui->tabWidget->setCurrentIndex(0);
     firstSearch = false;
     on_pushButton_newSearchRow_clicked();
 }
@@ -1170,6 +1271,7 @@ void MainWindow::on_tableWidget_trial_itemChanged(QTableWidgetItem *item)
         {
         case 0:
             hasInit = false;
+            ui->tableWidget_trial->setRowCount(0);
             load_trial_data("SELECT * FROM Trial");
             hasInit = true;
             break;
@@ -1198,7 +1300,8 @@ void MainWindow::on_tableWidget_nodes_itemChanged(QTableWidgetItem *item)
         {
         case 0:
             hasInit = false;
-            load_trial_data("SELECT * FROM Nodes");
+            ui->tableWidget_nodes->setRowCount(0);
+            load_node_data("SELECT * FROM Nodes");
             hasInit = true;
             break;
         case 1:
@@ -1226,7 +1329,8 @@ void MainWindow::on_tableWidget_target_itemChanged(QTableWidgetItem *item)
         {
         case 0:
             hasInit = false;
-            load_trial_data("SELECT * FROM Target");
+            ui->tableWidget_target->setRowCount(0);
+            load_target_data("SELECT * FROM Target");
             hasInit = true;
             break;
         case 1:
@@ -1254,7 +1358,8 @@ void MainWindow::on_tableWidget_pulse_itemChanged(QTableWidgetItem *item)
         {
         case 0:
             hasInit = false;
-            load_trial_data("SELECT * FROM Pulse");
+            ui->tableWidget_pulse->setRowCount(0);
+            load_pulse_data("SELECT * FROM Pulse");
             hasInit = true;
             break;
         case 1:
@@ -1282,7 +1387,8 @@ void MainWindow::on_tableWidget_weather_itemChanged(QTableWidgetItem *item)
         {
         case 0:
             hasInit = false;
-            load_trial_data("SELECT * FROM Weather");
+            ui->tableWidget_weather->setRowCount(0);
+            load_weather_data("SELECT * FROM Weather");
             hasInit = true;
             break;
         case 1:

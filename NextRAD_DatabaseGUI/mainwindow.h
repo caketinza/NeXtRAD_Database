@@ -27,15 +27,15 @@ public:
     ~MainWindow();
 
 private slots:    
-    bool load_trial_data(QString querytext);
+    QStringList load_trial_data(QString querytext);
 
-    bool load_node_data(QString querytext);
+    QStringList load_node_data(QString querytext);
 
-    bool load_pulse_data(QString querytext);
+    QStringList load_pulse_data(QString querytext);
 
-    bool load_target_data(QString querytext);
+    QStringList load_target_data(QString querytext);
 
-    bool load_weather_data(QString querytext);
+    QStringList load_weather_data(QString querytext);
 
 
     void on_pushButton_loadFiles_clicked();
